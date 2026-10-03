@@ -44,9 +44,15 @@ importers:
       '@trackwise/shared':
         specifier: workspace:*
         version: link:../../packages/shared
+      '@trackwise/telegram':
+        specifier: workspace:*
+        version: link:../../packages/telegram
       '@trackwise/timer':
         specifier: workspace:*
         version: link:../../packages/timer
+      '@trackwise/whatsapp':
+        specifier: workspace:*
+        version: link:../../packages/whatsapp
       next:
         specifier: ^15.1.3
         version: 15.5.27(@types/node@22.20.5)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)

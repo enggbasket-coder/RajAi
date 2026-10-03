@@ -1,0 +1,27 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root { color-scheme: light; }
+body { @apply bg-slate-50 text-slate-900 antialiased; }
+
+@layer components {
+  .btn { @apply inline-flex items-center justify-center gap-2 rounded-md px-3 py-2 text-sm font-medium transition disabled:opacity-50 disabled:cursor-not-allowed; }
+  .btn-primary { @apply btn bg-brand-600 text-white hover:bg-brand-700; }
+  .btn-secondary { @apply btn border border-slate-300 bg-white text-slate-700 hover:bg-slate-50; }
+  .btn-danger { @apply btn bg-rose-600 text-white hover:bg-rose-700; }
+  .btn-sm { @apply px-2 py-1 text-xs; }
+  .input { @apply w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-100; }
+  .label { @apply block text-xs font-medium uppercase tracking-wide text-slate-500 mb-1; }
+  .card { @apply rounded-lg border border-slate-200 bg-white shadow-sm; }
+  .card-body { @apply p-5; }
+  .table { @apply w-full text-sm; }
+  .table th { @apply text-left text-xs font-semibold uppercase tracking-wide text-slate-500 px-3 py-2 border-b border-slate-200 bg-slate-50; }
+  .table td { @apply px-3 py-2 border-b border-slate-100 align-top; }
+  .badge { @apply inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium; }
+  .nav-link { @apply flex items-center gap-2 rounded-md px-3 py-2 text-sm text-slate-600 hover:bg-slate-100 hover:text-slate-900; }
+  .nav-link-active { @apply bg-brand-50 text-brand-700 font-medium; }
+  .stat { @apply card card-body; }
+  .stat-value { @apply text-2xl font-semibold text-slate-900; }
+  .stat-label { @apply text-xs uppercase tracking-wide text-slate-500; }
+}
