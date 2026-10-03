@@ -1,0 +1,635 @@
+// Trackwise — multi-tenant time tracking & task management.
+// Every organization-owned table carries organizationId and is scoped server-side.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ───────────────────────── Enums ─────────────────────────
+
+enum Role {
+  OWNER
+  ADMIN
+  MANAGER
+  EMPLOYEE
+}
+
+enum ManagementChannel {
+  WEB
+  WHATSAPP
+  TELEGRAM
+}
+
+enum AssignmentChannelPreference {
+  WHATSAPP
+  TELEGRAM
+  BOTH
+  DEFAULT
+}
+
+enum MessagingProvider {
+  WHATSAPP
+  TELEGRAM
+}
+
+enum DeliveryChannel {
+  WHATSAPP
+  TELEGRAM
+  WEB
+}
+
+enum DeliveryStatus {
+  QUEUED
+  SENT
+  DELIVERED
+  READ
+  FAILED
+}
+
+enum ProjectStatus {
+  ACTIVE
+  PAUSED
+  COMPLETED
+  ARCHIVED
+}
+
+enum TaskPriority {
+  LOW
+  NORMAL
+  HIGH
+  URGENT
+}
+
+enum TaskStatus {
+  DRAFT
+  ASSIGNED
+  ACCEPTED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+enum AssignmentStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+  CANCELLED
+}
+
+enum MessageDirection {
+  INBOUND
+  OUTBOUND
+}
+
+enum MessageType {
+  TEXT
+  TEMPLATE
+  BUTTON
+  CALLBACK
+  SYSTEM
+}
+
+enum MessageStatus {
+  QUEUED
+  SENT
+  DELIVERED
+  READ
+  FAILED
+  RECEIVED
+}
+
+enum TimeSource {
+  WEB
+  DESKTOP
+  MANUAL
+  MOBILE
+}
+
+enum TimeEntryStatus {
+  RECORDED
+  SUBMITTED
+  APPROVED
+  REJECTED
+}
+
+enum TimesheetStatus {
+  DRAFT
+  SUBMITTED
+  APPROVED
+  REJECTED
+}
+
+enum ConnectionStatus {
+  NOT_CONNECTED
+  CONNECTED
+  ERROR
+  DISABLED
+}
+
+enum ConversationState {
+  IDLE
+  AWAITING_REJECTION_REASON
+  AWAITING_ASSIGN_CONFIRMATION
+  AWAITING_ASSIGNEE_CHOICE
+  AWAITING_PROJECT_CHOICE
+  AWAITING_DUE_CLARIFICATION
+}
+
+// ───────────────────────── Identity & tenancy ─────────────────────────
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  name         String
+  passwordHash String
+  timezone     String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  sessions            Session[]
+  passwordResets      PasswordResetToken[]
+  memberships         OrganizationMember[]
+  messagingIdentities UserMessagingIdentity[]
+
+  @@map("users")
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  userId    String
+  tokenHash String   @unique
+  client    String   @default("web")
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("sessions")
+}
+
+model PasswordResetToken {
+  id        String    @id @default(cuid())
+  userId    String
+  tokenHash String    @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("password_reset_tokens")
+}
+
+model Organization {
+  id                       String            @id @default(cuid())
+  name                     String
+  slug                     String            @unique
+  timezone                 String            @default("UTC")
+  defaultManagementChannel ManagementChannel @default(WEB)
+  defaultBillable          Boolean           @default(true)
+  manualTimeEnabled        Boolean           @default(true)
+  idleTimeoutMinutes       Int               @default(10)
+  allowChannelFallback     Boolean           @default(false)
+  monitoringEnabled        Boolean           @default(false)
+  managersCreateClients    Boolean           @default(true)
+  managersCreateProjects   Boolean           @default(true)
+  notificationSettings     Json              @default("{}")
+  createdAt                DateTime          @default(now())
+  updatedAt                DateTime          @updatedAt
+
+  members              OrganizationMember[]
+  invitations          Invitation[]
+  clients              Client[]
+  projects             Project[]
+  tasks                Task[]
+  taskAssignments      TaskAssignment[]
+  assignmentDeliveries AssignmentDelivery[]
+  activeTimers         ActiveTimer[]
+  timeEntries          TimeEntry[]
+  timesheets           Timesheet[]
+  messagingConnections MessagingConnection[]
+  messagingIdentities  UserMessagingIdentity[]
+  communicationMessages CommunicationMessage[]
+  webhookEvents        MessagingWebhookEvent[]
+  auditLogs            AuditLog[]
+  conversations        MessagingConversation[]
+  linkTokens           TelegramLinkToken[]
+
+  @@map("organizations")
+}
+
+model OrganizationMember {
+  id                         String                      @id @default(cuid())
+  organizationId             String
+  userId                     String
+  role                       Role                        @default(EMPLOYEE)
+  active                     Boolean                     @default(true)
+  displayName                String?
+  managerUserId              String?
+  preferredAssignmentChannel AssignmentChannelPreference @default(DEFAULT)
+  lastSeenAt                 DateTime?
+  createdAt                  DateTime                    @default(now())
+  updatedAt                  DateTime                    @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([organizationId, userId])
+  @@index([organizationId, role])
+  @@map("organization_members")
+}
+
+model Invitation {
+  id              String    @id @default(cuid())
+  organizationId  String
+  email           String
+  role            Role
+  invitedByUserId String
+  tokenHash       String    @unique
+  expiresAt       DateTime
+  acceptedAt      DateTime?
+  createdAt       DateTime  @default(now())
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId, email])
+  @@map("invitations")
+}
+
+// ───────────────────────── Work management ─────────────────────────
+
+model Client {
+  id             String   @id @default(cuid())
+  organizationId String
+  name           String
+  code           String?
+  notes          String?
+  active         Boolean  @default(true)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  projects     Project[]
+
+  @@unique([organizationId, code])
+  @@index([organizationId, name])
+  @@map("clients")
+}
+
+model Project {
+  id             String        @id @default(cuid())
+  organizationId String
+  clientId       String?
+  name           String
+  code           String?
+  description    String?
+  managerUserId  String?
+  budgetHours    Decimal?      @db.Decimal(10, 2)
+  billable       Boolean       @default(true)
+  hourlyRate     Decimal?      @db.Decimal(10, 2)
+  startDate      DateTime?
+  dueDate        DateTime?
+  status         ProjectStatus @default(ACTIVE)
+  archived       Boolean       @default(false)
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  organization Organization  @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  client       Client?       @relation(fields: [clientId], references: [id], onDelete: SetNull)
+  tasks        Task[]
+  timeEntries  TimeEntry[]
+  activeTimers ActiveTimer[]
+
+  @@unique([organizationId, code])
+  @@index([organizationId, status])
+  @@index([organizationId, clientId])
+  @@map("projects")
+}
+
+model Task {
+  id                String       @id @default(cuid())
+  organizationId    String
+  projectId         String
+  createdByUserId   String
+  title             String
+  description       String?
+  dueAt             DateTime?
+  estimatedMinutes  Int?
+  priority          TaskPriority @default(NORMAL)
+  billable          Boolean      @default(true)
+  status            TaskStatus   @default(DRAFT)
+  completedAt       DateTime?
+  completedByUserId String?
+  createdAt         DateTime     @default(now())
+  updatedAt         DateTime     @updatedAt
+
+  organization Organization           @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  project      Project                @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  assignments  TaskAssignment[]
+  timeEntries  TimeEntry[]
+  activeTimers ActiveTimer[]
+  messages     CommunicationMessage[]
+
+  @@index([organizationId, status])
+  @@index([organizationId, projectId])
+  @@index([organizationId, createdAt])
+  @@map("tasks")
+}
+
+model TaskAssignment {
+  id                     String                      @id @default(cuid())
+  organizationId         String
+  taskId                 String
+  userId                 String
+  assignedByUserId       String
+  assignedAt             DateTime                    @default(now())
+  status                 AssignmentStatus            @default(PENDING)
+  respondedAt            DateTime?
+  rejectionReason        String?
+  preferredChannel       AssignmentChannelPreference @default(DEFAULT)
+  invalidReplyPromptedAt DateTime?
+  createdAt              DateTime                    @default(now())
+  updatedAt              DateTime                    @updatedAt
+
+  organization Organization           @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  task         Task                   @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  deliveries   AssignmentDelivery[]
+  messages     CommunicationMessage[]
+
+  @@unique([taskId, userId])
+  @@index([organizationId, userId, status])
+  @@index([organizationId, status])
+  @@map("task_assignments")
+}
+
+model AssignmentDelivery {
+  id                String          @id @default(cuid())
+  organizationId    String
+  taskAssignmentId  String
+  channel           DeliveryChannel
+  status            DeliveryStatus  @default(QUEUED)
+  externalMessageId String?
+  attemptCount      Int             @default(0)
+  lastAttemptAt     DateTime?
+  sentAt            DateTime?
+  deliveredAt       DateTime?
+  readAt            DateTime?
+  failedAt          DateTime?
+  errorCode         String?
+  errorMessage      String?
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+
+  organization   Organization   @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  taskAssignment TaskAssignment @relation(fields: [taskAssignmentId], references: [id], onDelete: Cascade)
+
+  @@unique([taskAssignmentId, channel])
+  @@index([organizationId, status])
+  @@index([channel, externalMessageId])
+  @@map("assignment_deliveries")
+}
+
+// ───────────────────────── Time tracking ─────────────────────────
+
+model ActiveTimer {
+  id             String     @id @default(cuid())
+  organizationId String
+  userId         String     @unique // ← at most one active timer per user, enforced by the database
+  taskId         String
+  projectId      String
+  startedAt      DateTime   @default(now())
+  source         TimeSource @default(WEB)
+  lastHeartbeatAt DateTime  @default(now())
+  createdAt      DateTime   @default(now())
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  task         Task         @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  project      Project      @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId])
+  @@map("active_timers")
+}
+
+model TimeEntry {
+  id              String          @id @default(cuid())
+  organizationId  String
+  userId          String
+  projectId       String
+  taskId          String?
+  timesheetId     String?
+  startedAt       DateTime
+  stoppedAt       DateTime
+  durationSeconds Int
+  source          TimeSource      @default(WEB)
+  manual          Boolean         @default(false)
+  manualReason    String?
+  billable        Boolean         @default(true)
+  status          TimeEntryStatus @default(RECORDED)
+  idleSecondsKept Int             @default(0)
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  project      Project      @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  task         Task?        @relation(fields: [taskId], references: [id], onDelete: SetNull)
+  timesheet    Timesheet?   @relation(fields: [timesheetId], references: [id], onDelete: SetNull)
+
+  @@index([organizationId, userId, startedAt])
+  @@index([organizationId, projectId, startedAt])
+  @@index([organizationId, status])
+  @@map("time_entries")
+}
+
+model Timesheet {
+  id               String          @id @default(cuid())
+  organizationId   String
+  userId           String
+  weekStart        DateTime // Monday 00:00 in org timezone, stored UTC
+  status           TimesheetStatus @default(DRAFT)
+  submittedAt      DateTime?
+  reviewedAt       DateTime?
+  reviewedByUserId String?
+  reviewComment    String?
+  reopenedAt       DateTime?
+  reopenedByUserId String?
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  entries      TimeEntry[]
+
+  @@unique([organizationId, userId, weekStart])
+  @@index([organizationId, status])
+  @@map("timesheets")
+}
+
+// ───────────────────────── Messaging ─────────────────────────
+
+model MessagingConnection {
+  id             String            @id @default(cuid())
+  organizationId String
+  provider       MessagingProvider
+  enabled        Boolean           @default(false)
+  status         ConnectionStatus  @default(NOT_CONNECTED)
+  // WhatsApp (Meta Cloud API)
+  wabaId              String?
+  phoneNumberId       String?
+  displayPhoneNumber  String?
+  accessTokenEncrypted String?
+  verifyTokenEncrypted String?
+  appSecretEncrypted   String?
+  assignmentTemplateName String?
+  // Telegram
+  botId               String?
+  botUsername         String?
+  botTokenEncrypted   String?
+  webhookSecretEncrypted String?
+  webhookStatus       String?
+  lastError           String?
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@unique([organizationId, provider])
+  @@index([phoneNumberId])
+  @@map("messaging_connections")
+}
+
+model UserMessagingIdentity {
+  id             String            @id @default(cuid())
+  organizationId String
+  userId         String
+  provider       MessagingProvider
+  providerUserId String // WhatsApp: E.164 phone; Telegram: numeric user id
+  providerChatId String?
+  phoneNumber    String?
+  username       String?
+  verified       Boolean           @default(false)
+  verifiedAt     DateTime?
+  optedIn        Boolean           @default(false)
+  optedInAt      DateTime?
+  optInSource    String?
+  optedOutAt     DateTime?
+  disabled       Boolean           @default(false)
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
+
+  organization Organization           @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  user         User                   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  conversation MessagingConversation?
+
+  @@unique([organizationId, provider, providerUserId])
+  @@unique([organizationId, userId, provider])
+  @@index([provider, providerUserId])
+  @@map("user_messaging_identities")
+}
+
+model TelegramLinkToken {
+  id             String    @id @default(cuid())
+  organizationId String
+  userId         String
+  code           String    @unique
+  expiresAt      DateTime
+  usedAt         DateTime?
+  createdAt      DateTime  @default(now())
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@map("telegram_link_tokens")
+}
+
+/// Per-identity conversational state machine (rejection reason, pending confirmations, …).
+model MessagingConversation {
+  id             String            @id @default(cuid())
+  organizationId String
+  identityId     String            @unique
+  state          ConversationState @default(IDLE)
+  contextJson    Json              @default("{}")
+  updatedAt      DateTime          @updatedAt
+  createdAt      DateTime          @default(now())
+
+  organization Organization          @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  identity     UserMessagingIdentity @relation(fields: [identityId], references: [id], onDelete: Cascade)
+
+  @@map("messaging_conversations")
+}
+
+model CommunicationMessage {
+  id                String           @id @default(cuid())
+  organizationId    String
+  taskId            String?
+  taskAssignmentId  String?
+  userId            String?
+  channel           DeliveryChannel
+  direction         MessageDirection
+  messageType       MessageType
+  externalMessageId String?
+  externalThreadId  String?
+  body              String
+  templateName      String?
+  status            MessageStatus    @default(QUEUED)
+  conversationState ConversationState?
+  errorCode         String?
+  errorMessage      String?
+  metadataJson      Json             @default("{}")
+  sentAt            DateTime?
+  deliveredAt       DateTime?
+  readAt            DateTime?
+  receivedAt        DateTime?
+  failedAt          DateTime?
+  createdAt         DateTime         @default(now())
+
+  organization   Organization    @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  task           Task?           @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  taskAssignment TaskAssignment? @relation(fields: [taskAssignmentId], references: [id], onDelete: SetNull)
+
+  @@unique([channel, direction, externalMessageId])
+  @@index([organizationId, taskId, createdAt])
+  @@index([organizationId, userId, createdAt])
+  @@map("communication_messages")
+}
+
+model MessagingWebhookEvent {
+  id              String            @id @default(cuid())
+  organizationId  String?
+  provider        MessagingProvider
+  externalEventId String
+  eventType       String
+  payloadHash     String
+  processed       Boolean           @default(false)
+  processedAt     DateTime?
+  error           String?
+  payloadJson     Json
+  createdAt       DateTime          @default(now())
+
+  organization Organization? @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, externalEventId])
+  @@index([provider, payloadHash])
+  @@map("messaging_webhook_events")
+}
+
+// ───────────────────────── Audit ─────────────────────────
+
+model AuditLog {
+  id             String   @id @default(cuid())
+  organizationId String
+  actorUserId    String?
+  action         String
+  entityType     String
+  entityId       String?
+  metadataJson   Json     @default("{}")
+  ipAddress      String?
+  createdAt      DateTime @default(now())
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId, createdAt])
+  @@index([organizationId, entityType, entityId])
+  @@map("audit_logs")
+}
