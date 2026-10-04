@@ -59,9 +59,10 @@ export class TelegramMessagingProvider implements MessagingProviderAdapter {
     }
   }
 
-  private toResult(r: TgResponse<{ message_id: number }> & { httpStatus: number }): ProviderMessageResult {
+  /** Telegram message ids are only unique per chat, so the stored id is "<chat_id>:<message_id>". */
+  private toResult(r: TgResponse<{ message_id: number; chat?: { id: number } }> & { httpStatus: number }, chatId: string | number): ProviderMessageResult {
     if (r.ok && r.result?.message_id !== undefined) {
-      return { ok: true, externalMessageId: String(r.result.message_id), status: "SENT", raw: r };
+      return { ok: true, externalMessageId: `${r.result.chat?.id ?? chatId}:${r.result.message_id}`, status: "SENT", raw: r };
     }
     const code = r.error_code ?? r.httpStatus;
     const retryable = code === 0 || code === 429 || code >= 500;
@@ -73,17 +74,18 @@ export class TelegramMessagingProvider implements MessagingProviderAdapter {
     const chat_id = to.chatId ?? to.providerUserId;
     const reply_markup = keyboard(msg.buttons);
     if (msg.editMessageId) {
-      const r = await this.call<{ message_id: number }>(conn.botToken, "editMessageText", {
+      const messageId = Number(msg.editMessageId.includes(":") ? msg.editMessageId.split(":").pop() : msg.editMessageId);
+      const r = await this.call<{ message_id: number; chat?: { id: number } }>(conn.botToken, "editMessageText", {
         chat_id,
-        message_id: Number(msg.editMessageId),
+        message_id: messageId,
         text: msg.text,
         reply_markup,
       });
-      if (r.ok) return { ok: true, externalMessageId: msg.editMessageId, status: "SENT", raw: r };
+      if (r.ok) return { ok: true, externalMessageId: `${chat_id}:${messageId}`, status: "SENT", raw: r };
       // Fall through to sending a fresh message if the edit is not possible.
     }
-    const r = await this.call<{ message_id: number }>(conn.botToken, "sendMessage", { chat_id, text: msg.text, reply_markup });
-    return this.toResult(r);
+    const r = await this.call<{ message_id: number; chat?: { id: number } }>(conn.botToken, "sendMessage", { chat_id, text: msg.text, reply_markup });
+    return this.toResult(r, chat_id);
   }
 
   async sendTaskAssignment(connection: ProviderConnection, to: OutboundRecipient, content: AssignmentMessageContent): Promise<ProviderMessageResult> {

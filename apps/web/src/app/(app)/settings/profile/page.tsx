@@ -17,7 +17,7 @@ export default async function ProfileMessaging() {
       <PageHeader title="My messaging" subtitle="Where Trackwise sends your task assignments. You can disconnect at any time." />
       <div className="grid gap-6 lg:grid-cols-3">
         <Card title={<>WhatsApp {me.whatsapp?.verified && me.whatsapp.optedIn ? <span className="badge bg-emerald-100 text-emerald-800">Opted in</span> : me.whatsapp ? <span className="badge bg-amber-100 text-amber-800">Not opted in</span> : null}</>}>
-          {!wa?.enabled ? <p className="text-sm text-slate-500">WhatsApp is not connected for this organization.</p> : null}
+          {!wa?.enabled ? <p className="mb-3 rounded-sharp bg-amber-50 p-3 text-xs text-amber-800 dark:bg-amber-500/10 dark:text-amber-300">Your organization has not connected WhatsApp yet. You can save your number now; messages start once an admin connects it.</p> : null}
           {me.whatsapp ? (
             <div className="mb-3 text-sm">
               <div className="font-mono">{me.whatsapp.phoneMasked}</div>
@@ -34,7 +34,7 @@ export default async function ProfileMessaging() {
           </JsonForm>
         </Card>
         <Card title={<>Telegram {me.telegram?.verified ? <span className="badge bg-emerald-100 text-emerald-800">Connected</span> : <span className="badge bg-slate-200 text-slate-600">Not connected</span>}</>}>
-          {!me.telegramEnabled ? <p className="text-sm text-slate-500">Telegram is not connected for this organization.</p> : me.telegram?.verified ? (
+          {!me.telegramEnabled ? <p className="rounded-sharp bg-amber-50 p-3 text-xs text-amber-800 dark:bg-amber-500/10 dark:text-amber-300">Your organization has not connected a Telegram bot yet. Ask an admin to set it up under Messaging settings.</p> : me.telegram?.verified ? (
             <div className="text-sm">
               <div>{me.telegram.username ? `@${me.telegram.username}` : "Linked account"}</div>
               <div className="text-xs text-slate-500">Linked {me.telegram.linkedAt?.toISOString().slice(0, 10)}</div>

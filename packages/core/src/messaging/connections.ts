@@ -99,7 +99,7 @@ export const ConnectionService = {
             webhookStatus: res.ok ? "REGISTERED" : `FAILED: ${res.description ?? "unknown"}`,
             status: res.ok ? "CONNECTED" : "ERROR",
             lastError: res.ok ? null : res.description ?? null,
-            ...(me ? { botId: me.id, botUsername: me.username } : {}),
+            ...(me ? { botId: me.id, ...(provider.isMock && row.botUsername ? {} : { botUsername: me.username }) } : {}),
           },
         });
       }

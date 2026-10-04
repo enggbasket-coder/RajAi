@@ -25,7 +25,7 @@ export function EntriesTable({ entries, tz, editable }: { entries: EntryRow[]; t
                 <td className="text-right">
                   {canEdit ? (
                     <span className="inline-flex gap-1">
-                      <ActionButton action={`/api/time-entries/${e.id}`} method="PATCH" body={{ billable: !e.billable }} className="btn-secondary btn-sm">{e.billable ? "Non-billable" : "Billable"}</ActionButton>
+                      <ActionButton action={`/api/time-entries/${e.id}`} method="PATCH" body={{ billable: !e.billable }} className="btn-secondary btn-sm">{e.billable ? "Mark non-billable" : "Mark billable"}</ActionButton>
                       <ActionButton action={`/api/time-entries/${e.id}`} method="DELETE" className="btn-secondary btn-sm" confirm="Delete this time entry?">Delete</ActionButton>
                     </span>
                   ) : <span className="text-xs text-slate-400">Locked</span>}

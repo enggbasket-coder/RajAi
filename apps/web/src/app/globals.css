@@ -81,6 +81,9 @@ h1, h2, h3 { letter-spacing: -0.01em; }
   /* Cards: big radius, no visible border, white on grey */
   .card { @apply rounded-card border border-slate-100 bg-white shadow-card; }
   .card-body { @apply p-6; }
+  .card-body:has(> .table), .card-body:has(> table) { @apply overflow-x-auto; }
+  .table { min-width: 100%; }
+  .grid > * { min-width: 0; }
   .inset { @apply rounded-sharp bg-slate-50; }
 
   .table { @apply w-full text-sm; }

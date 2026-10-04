@@ -18,11 +18,40 @@ export default async function DashboardPage() {
     TimesheetService.list(actor, { status: "SUBMITTED" }),
     TaskService.list(actor),
   ]);
+  const [memberCount, projectCount, connectionCount, taskCount] = await Promise.all([
+    prisma.organizationMember.count({ where: { organizationId: actor.organizationId, active: true } }),
+    prisma.project.count({ where: { organizationId: actor.organizationId, archived: false } }),
+    prisma.messagingConnection.count({ where: { organizationId: actor.organizationId, enabled: true } }),
+    prisma.task.count({ where: { organizationId: actor.organizationId } }),
+  ]);
+  const steps = [
+    { done: connectionCount > 0, label: "Connect WhatsApp or Telegram", href: "/settings/messaging", hint: "Employees receive assignments on the channel you connect. Web-only works too." },
+    { done: memberCount > 1, label: "Invite your team", href: "/members/invite", hint: "Managers assign work; employees accept it and track time." },
+    { done: projectCount > 0, label: "Create a client and project", href: "/projects", hint: "Every task and time entry belongs to a project." },
+    { done: taskCount > 0, label: "Assign your first task", href: "/tasks/new", hint: "Pick an assignee, choose the channel, and send." },
+  ];
+  const showGettingStarted = steps.some((st) => !st.done);
   const failed = await prisma.assignmentDelivery.findMany({ where: { organizationId: actor.organizationId, status: "FAILED" }, include: { taskAssignment: { include: { task: true } } }, orderBy: { failedAt: "desc" }, take: 5 });
   const users = await prisma.user.findMany({ where: { id: { in: failed.map((f) => f.taskAssignment.userId) } }, select: { id: true, name: true } });
   return (
     <>
       <PageHeader title="Dashboard" subtitle={org.name} actions={<Link href="/tasks/new" className="btn-primary">＋ Assign task</Link>} />
+      {showGettingStarted ? (
+        <Card title="Getting started" className="mb-6" actions={<span className="text-xs text-slate-500">{steps.filter((st) => st.done).length} of {steps.length} done</span>}>
+          <ol className="grid gap-3 md:grid-cols-4">
+            {steps.map((st, i) => (
+              <li key={st.label} className={`inset flex flex-col gap-1 p-4 ${st.done ? "opacity-60" : ""}`}>
+                <div className="flex items-center gap-2">
+                  <span className={`inline-flex h-6 w-6 items-center justify-center rounded-full text-xs font-medium ${st.done ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300" : "bg-ink text-white dark:text-[#0a0e17]"}`}>{st.done ? "✓" : i + 1}</span>
+                  <span className={`text-sm font-medium ${st.done ? "line-through" : ""}`}>{st.label}</span>
+                </div>
+                <p className="text-xs text-slate-500">{st.hint}</p>
+                {!st.done ? <Link href={st.href} className="mt-1 text-xs font-medium text-brand-600 hover:underline">Do this →</Link> : null}
+              </li>
+            ))}
+          </ol>
+        </Card>
+      ) : null}
       <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
         <Stat label="Tracking now" value={s.trackingNow} tone="ok" icon="clock" />
         <Stat label="Hours today" value={formatDuration(s.hoursTodaySeconds)} icon="hours" />

@@ -40,7 +40,7 @@ export default async function WeeklyTimesheet({ searchParams }: { searchParams: 
           <button className="btn-secondary btn-sm">View</button>
         </form>
       ) : null}
-      <div className="mb-4 grid grid-cols-7 gap-2">
+      <div className="mb-4 grid grid-cols-4 gap-2 md:grid-cols-7">
         {week.days.map((d) => (
           <Link key={d.key} href={`/timesheets/daily?date=${d.key}${!self ? `&userId=${userId}` : ""}`} className="card p-3 text-center hover:border-brand-300">
             <div className="text-xs uppercase text-slate-500">{new Intl.DateTimeFormat("en-GB", { weekday: "short", timeZone: week.timezone }).format(d.date)}</div>

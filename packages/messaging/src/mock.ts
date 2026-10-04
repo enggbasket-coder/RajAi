@@ -79,7 +79,8 @@ function record(provider: "WHATSAPP" | "TELEGRAM", to: OutboundRecipient, messag
     return { ok: false, errorCode: "MOCK_PERMANENT", errorMessage: "Simulated permanent provider failure (e.g. recipient not reachable)", retryable: false };
   }
   s.seq += 1;
-  const id = `mock-${provider.toLowerCase()}-${s.seq}`;
+  // Editing an existing message keeps its id (like Telegram editMessageText); new messages get a restart-safe unique id.
+  const id = message.editMessageId ?? `mock-${provider.toLowerCase()}-${Date.now().toString(36)}-${s.seq}`;
   s.outbox.push({ id, provider, to, message, at: new Date() });
   return { ok: true, externalMessageId: id, status: "SENT" };
 }

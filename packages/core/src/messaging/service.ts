@@ -81,6 +81,14 @@ async function recordOutbound(input: {
   metadata?: Record<string, unknown>;
 }) {
   const ok = input.result?.ok === true;
+  const externalMessageId = ok && input.result?.ok ? input.result.externalMessageId : null;
+  if (externalMessageId) {
+    // Edits re-use the provider message id: update the existing outbound row instead of inserting a duplicate.
+    const existing = await prisma.communicationMessage.findUnique({ where: { channel_direction_externalMessageId: { channel: input.channel, direction: "OUTBOUND", externalMessageId } } });
+    if (existing) {
+      return prisma.communicationMessage.update({ where: { id: existing.id }, data: { body: input.body, metadataJson: asJson({ ...(existing.metadataJson as object), ...input.metadata, editedAt: new Date().toISOString() }), sentAt: new Date() } });
+    }
+  }
   return prisma.communicationMessage.create({
     data: {
       organizationId: input.organizationId,
@@ -92,7 +100,7 @@ async function recordOutbound(input: {
       taskAssignmentId: input.taskAssignmentId ?? null,
       body: input.body,
       templateName: input.templateName ?? null,
-      externalMessageId: ok && input.result?.ok ? input.result.externalMessageId : null,
+      externalMessageId,
       status: input.result === null ? "SENT" : ok ? "SENT" : "FAILED",
       sentAt: ok || input.result === null ? new Date() : null,
       failedAt: input.result && !ok ? new Date() : null,
@@ -352,18 +360,37 @@ export const MessagingService = {
     type Item = { at: Date; kind: "WHATSAPP" | "TELEGRAM" | "SYSTEM" | "WEB"; actor: string; title: string; detail?: string | null; status?: string | null; direction?: "INBOUND" | "OUTBOUND" };
     const items: Item[] = [];
     for (const m of messages) {
-      items.push({ at: m.createdAt, kind: m.channel === "WEB" ? "SYSTEM" : m.channel, actor: m.direction === "INBOUND" ? nameOf(m.userId) : "Trackwise", title: m.direction === "INBOUND" ? `"${m.body}"` : m.body, status: m.status, direction: m.direction, detail: m.errorMessage });
-      if (m.deliveredAt) items.push({ at: m.deliveredAt, kind: m.channel === "WEB" ? "SYSTEM" : m.channel, actor: m.channel, title: "Delivered ✓" });
-      if (m.readAt) items.push({ at: m.readAt, kind: m.channel === "WEB" ? "SYSTEM" : m.channel, actor: m.channel, title: "Read ✓✓" });
+      const isWeb = m.channel === "WEB";
+      const notification = m.messageType === "SYSTEM" && m.direction === "OUTBOUND";
+      items.push({
+        at: m.createdAt,
+        kind: isWeb ? "SYSTEM" : m.channel,
+        actor: m.direction === "INBOUND" ? nameOf(m.userId) : notification ? `Notification → ${nameOf(m.userId)}` : "Trackwise",
+        title: m.direction === "INBOUND" ? `"${m.body}"` : m.body,
+        status: isWeb ? null : m.status,
+        direction: m.direction,
+        detail: m.errorMessage,
+      });
+      // Provider delivery receipts (WhatsApp only reports these; web/in-app rows have none).
+      if (!isWeb && m.deliveredAt && m.deliveredAt.getTime() - m.createdAt.getTime() > 1000) items.push({ at: m.deliveredAt, kind: m.channel, actor: m.channel === "WHATSAPP" ? "WhatsApp" : "Telegram", title: "Delivered ✓" });
+      if (!isWeb && m.readAt) items.push({ at: m.readAt, kind: m.channel, actor: m.channel === "WHATSAPP" ? "WhatsApp" : "Telegram", title: "Read ✓✓" });
     }
     for (const a of audits) {
       const meta = (a.metadataJson ?? {}) as Record<string, unknown>;
-      items.push({ at: a.createdAt, kind: "SYSTEM", actor: nameOf(a.actorUserId), title: humanizeAction(a.action, meta), detail: typeof meta.reason === "string" ? meta.reason : null });
+      const showReason = a.action === "task.rejected" || a.action === "timesheet.rejected";
+      items.push({ at: a.createdAt, kind: "SYSTEM", actor: nameOf(a.actorUserId), title: humanizeAction(a.action, meta), detail: showReason && typeof meta.reason === "string" ? meta.reason : null });
     }
     items.sort((x, y) => x.at.getTime() - y.at.getTime());
     return filter === "ALL" ? items : items.filter((i) => i.kind === filter);
   },
 };
+
+function fmtSecs(s: number) {
+  if (s < 60) return `${s}s`;
+  const h = Math.floor(s / 3600);
+  const m = Math.round((s % 3600) / 60);
+  return h ? `${h}h ${String(m).padStart(2, "0")}m` : `${m}m`;
+}
 
 function humanizeAction(action: string, meta: Record<string, unknown>) {
   const map: Record<string, string> = {
@@ -374,7 +401,7 @@ function humanizeAction(action: string, meta: Record<string, unknown>) {
     "task.completed": "Task completed",
     "task.cancelled": "Task cancelled",
     "timer.started": "Started timer",
-    "timer.stopped": `Stopped timer${typeof meta.durationSeconds === "number" ? ` (${Math.round((meta.durationSeconds as number) / 60)}m)` : ""}`,
+    "timer.stopped": `Stopped timer${typeof meta.durationSeconds === "number" ? ` · ${fmtSecs(meta.durationSeconds as number)}` : ""}${meta.reason === "switch" ? " (switched task)" : meta.reason === "task_completed" ? " (task completed)" : ""}`,
     "message.retry": "Retried delivery",
     "assignment.cancelled": "Assignment cancelled",
   };

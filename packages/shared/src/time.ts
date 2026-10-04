@@ -97,6 +97,7 @@ export function formatDuration(seconds: number): string {
   const s = Math.max(0, Math.round(seconds));
   const h = Math.floor(s / 3600);
   const m = Math.floor((s % 3600) / 60);
+  if (h === 0 && m === 0) return s === 0 ? "0m" : `${s}s`;
   if (h === 0) return `${m}m`;
   return `${h}h ${String(m).padStart(2, "0")}m`;
 }
