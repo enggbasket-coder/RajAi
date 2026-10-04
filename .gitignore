@@ -12,3 +12,4 @@ coverage/
 packages/database/generated/
 apps/desktop/release/
 .DS_Store
+.env.production

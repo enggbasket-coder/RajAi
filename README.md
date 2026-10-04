@@ -158,6 +158,8 @@ Features: sign in (Bearer session, stored in the OS user-data folder), organizat
 
 ## Production environment
 
+**One-command Docker deployment** (Postgres + web + Caddy with automatic HTTPS) is documented in [`deploy/README.md`](deploy/README.md): `cp deploy/.env.production.example .env`, fill in secrets, `./deploy/deploy.sh`. The notes below apply to any other hosting.
+
 - Set `NODE_ENV=production`, `APP_URL=https://…`, a long random `AUTH_SECRET` and a separate `ENCRYPTION_KEY`, `ENABLE_DEV_TOOLS=false` (or unset), `WHATSAPP_PROVIDER=meta`, `TELEGRAM_PROVIDER=telegram`. Per-organization credentials entered in the UI take precedence; `META_*` / `TELEGRAM_*` env values act as defaults when a field is empty.
 - `pnpm install --frozen-lockfile && pnpm db:deploy && pnpm build && pnpm start`.
 - Terminate TLS in front of the app; cookies are `HttpOnly`, `SameSite=Lax`, `Secure` in production.
