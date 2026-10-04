@@ -55,10 +55,10 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
         <button className="btn-secondary">Apply</button>
       </form>
       <div className="mb-6 grid grid-cols-2 gap-4 md:grid-cols-4">
-        <Stat label="Total" value={formatDuration(report.totalSeconds)} hint={`${report.entryCount} entries`} />
-        <Stat label="Billable" value={formatDuration(report.billableSeconds)} tone="ok" />
-        <Stat label="Non-billable" value={formatDuration(report.nonBillableSeconds)} />
-        <Stat label="Billable share" value={`${report.totalSeconds ? Math.round((report.billableSeconds / report.totalSeconds) * 100) : 0}%`} />
+        <Stat label="Total" value={formatDuration(report.totalSeconds)} hint={`${report.entryCount} entries`} icon="hours" />
+        <Stat label="Billable" value={formatDuration(report.billableSeconds)} tone="ok" icon="bill" />
+        <Stat label="Non-billable" value={formatDuration(report.nonBillableSeconds)} icon="tasks" />
+        <Stat label="Billable share" value={`${report.totalSeconds ? Math.round((report.billableSeconds / report.totalSeconds) * 100) : 0}%`} icon="percent" />
       </div>
       <div className="grid gap-6 lg:grid-cols-2">
         {managerial ? <Table title="Hours by employee" rows={report.byEmployee} /> : null}

@@ -9,8 +9,6 @@ export default {
   theme: {
     extend: {
       colors: {
-        // Existing utilities (bg-white, text-slate-600, border-slate-200, …) are remapped to theme tokens,
-        // so every page follows the toggle without per-element dark: classes.
         white: v("--c-surface"),
         slate: {
           50: v("--c-s50"),
@@ -24,15 +22,17 @@ export default {
           800: v("--c-s800"),
           900: v("--c-s900"),
         },
-        brand: { 50: v("--c-brand50"), 100: v("--c-brand100"), 500: v("--c-brand500"), 600: v("--c-brand600"), 700: v("--c-brand700") },
+        brand: { 50: v("--c-brand50"), 100: v("--c-brand100"), 500: v("--c-accent"), 600: v("--c-accent"), 700: v("--c-accent-deep") },
+        accent: { DEFAULT: v("--c-accent"), deep: v("--c-accent-deep"), soft: v("--c-brand50") },
+        ink: v("--c-ink"),
         canvas: v("--c-canvas"),
         surface: v("--c-surface"),
-        line: v("--c-line"),
       },
-      borderRadius: { sharp: "4px" },
+      borderRadius: { sharp: "14px", card: "24px", frame: "32px" },
       boxShadow: {
         card: "var(--shadow-card)",
-        glow: "0 0 0 1px rgb(var(--c-brand500) / 0.35), 0 8px 30px -12px rgb(var(--c-brand500) / 0.45)",
+        frame: "var(--shadow-frame)",
+        glow: "0 10px 30px -12px rgb(var(--c-accent) / 0.55)",
       },
       fontFamily: {
         sans: ["Inter", "ui-sans-serif", "system-ui", "-apple-system", "Segoe UI", "Roboto", "sans-serif"],

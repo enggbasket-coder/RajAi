@@ -54,12 +54,12 @@ export default async function TaskDetail({ params, searchParams }: { params: Pro
         </>}
       />
       <div className="mb-6 grid grid-cols-2 gap-3 text-sm md:grid-cols-6">
-        <div className="card p-3"><div className="stat-label">Status</div><Badge value={task.status} /></div>
-        <div className="card p-3"><div className="stat-label">Priority</div><Badge value={task.priority} /></div>
-        <div className="card p-3"><div className="stat-label">Due</div>{task.dueAt ? formatDateTime(task.dueAt, tz) : "—"}</div>
-        <div className="card p-3"><div className="stat-label">Estimate</div>{task.estimatedMinutes ? formatDuration(task.estimatedMinutes * 60) : "—"}</div>
-        <div className="card p-3"><div className="stat-label">Actual</div>{formatDuration(actual)}</div>
-        <div className="card p-3"><div className="stat-label">Billable</div>{task.billable ? "Yes" : "No"}</div>
+        <div className="card p-4"><div className="stat-label">Status</div><Badge value={task.status} /></div>
+        <div className="card p-4"><div className="stat-label">Priority</div><Badge value={task.priority} /></div>
+        <div className="card p-4"><div className="stat-label">Due</div>{task.dueAt ? formatDateTime(task.dueAt, tz) : "—"}</div>
+        <div className="card p-4"><div className="stat-label">Estimate</div>{task.estimatedMinutes ? formatDuration(task.estimatedMinutes * 60) : "—"}</div>
+        <div className="card p-4"><div className="stat-label">Actual</div>{formatDuration(actual)}</div>
+        <div className="card p-4"><div className="stat-label">Billable</div>{task.billable ? "Yes" : "No"}</div>
       </div>
       <Tabs tabs={tabs} active={tab} />
 

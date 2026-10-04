@@ -14,7 +14,7 @@ export function TelegramLink({ userId, botUsername }: { userId: string; botUsern
         <li>Send <code>/start &lt;code&gt;</code>. Linking completes instantly.</li>
       </ol>
       {code ? (
-        <div className="rounded-md bg-sky-50 p-3">
+        <div className="rounded-sharp bg-sky-50 p-3">
           <div className="text-xs uppercase text-sky-700">Your code (15 min, single use)</div>
           <div className="font-mono text-xl">{code.code}</div>
           <div className="mt-1 text-xs text-slate-600">Send to the bot: <code>/start {code.code}</code></div>

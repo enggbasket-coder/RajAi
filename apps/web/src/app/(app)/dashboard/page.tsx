@@ -24,20 +24,20 @@ export default async function DashboardPage() {
     <>
       <PageHeader title="Dashboard" subtitle={org.name} actions={<Link href="/tasks/new" className="btn-primary">＋ Assign task</Link>} />
       <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
-        <Stat label="Tracking now" value={s.trackingNow} tone="ok" />
-        <Stat label="Hours today" value={formatDuration(s.hoursTodaySeconds)} />
-        <Stat label="Tasks assigned today" value={s.tasksAssignedToday} />
-        <Stat label="Timesheets awaiting approval" value={s.timesheetsAwaiting} tone={s.timesheetsAwaiting ? "warn" : undefined} />
-        <Stat label="Assignments accepted" value={s.assignmentsAccepted} tone="ok" />
-        <Stat label="Assignments pending" value={s.assignmentsPending} tone={s.assignmentsPending ? "warn" : undefined} />
-        <Stat label="Assignments rejected" value={s.assignmentsRejected} tone={s.assignmentsRejected ? "danger" : undefined} />
-        <Stat label="Messaging failures" value={s.messagingFailures} tone={s.messagingFailures ? "danger" : "ok"} />
+        <Stat label="Tracking now" value={s.trackingNow} tone="ok" icon="clock" />
+        <Stat label="Hours today" value={formatDuration(s.hoursTodaySeconds)} icon="hours" />
+        <Stat label="Tasks assigned today" value={s.tasksAssignedToday} icon="tasks" />
+        <Stat label="Timesheets awaiting approval" value={s.timesheetsAwaiting} tone={s.timesheetsAwaiting ? "warn" : undefined} icon="sheet" />
+        <Stat label="Assignments accepted" value={s.assignmentsAccepted} tone="ok" icon="check" />
+        <Stat label="Assignments pending" value={s.assignmentsPending} tone={s.assignmentsPending ? "warn" : undefined} icon="pending" />
+        <Stat label="Assignments rejected" value={s.assignmentsRejected} tone={s.assignmentsRejected ? "danger" : undefined} icon="reject" />
+        <Stat label="Messaging failures" value={s.messagingFailures} tone={s.messagingFailures ? "danger" : "ok"} icon="alert" />
       </div>
       <div className="mt-6 grid gap-6 lg:grid-cols-3">
         <Card title="Messaging">
           <div className="grid grid-cols-2 gap-4 text-sm">
             <div>
-              <div className="mb-1 font-medium text-emerald-700">WhatsApp</div>
+              <div className="mb-2 inline-flex rounded-full bg-emerald-50 px-2.5 py-0.5 text-xs font-medium text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300">WhatsApp</div>
               <dl className="space-y-0.5 text-slate-600">
                 <div className="flex justify-between"><dt>Delivered</dt><dd>{s.messaging.whatsapp.delivered}</dd></div>
                 <div className="flex justify-between"><dt>Sent</dt><dd>{s.messaging.whatsapp.sent}</dd></div>
@@ -46,7 +46,7 @@ export default async function DashboardPage() {
               </dl>
             </div>
             <div>
-              <div className="mb-1 font-medium text-sky-700">Telegram</div>
+              <div className="mb-2 inline-flex rounded-full bg-sky-50 px-2.5 py-0.5 text-xs font-medium text-sky-700 dark:bg-sky-500/15 dark:text-sky-300">Telegram</div>
               <dl className="space-y-0.5 text-slate-600">
                 <div className="flex justify-between"><dt>Delivered/Sent</dt><dd>{s.messaging.telegram.delivered}</dd></div>
                 <div className="flex justify-between"><dt>Pending</dt><dd>{s.messaging.telegram.pending}</dd></div>
@@ -86,7 +86,7 @@ export default async function DashboardPage() {
               {recent.slice(0, 6).map((t) => (
                 <li key={t.id} className="py-2">
                   <div className="flex items-center justify-between gap-2">
-                    <Link href={`/tasks/${t.id}`} className="truncate font-medium text-slate-800 hover:text-brand-700">{t.title}</Link>
+                    <Link href={`/tasks/${t.id}`} className="truncate font-medium text-slate-900 hover:text-brand-600">{t.title}</Link>
                     <Badge value={t.status} />
                   </div>
                   <div className="text-xs text-slate-500">{t.project.name} · {formatDateTime(t.createdAt, org.timezone)}</div>

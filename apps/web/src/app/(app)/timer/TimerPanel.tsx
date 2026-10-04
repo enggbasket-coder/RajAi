@@ -64,7 +64,7 @@ export function TimerPanel({ tasks, initial, preselectTaskId, manualEnabled, pro
       <div className="lg:col-span-2 space-y-6">
         <Card>
           <div className="flex flex-col items-center gap-4 py-6 text-center">
-            <div className={`font-mono text-6xl tabular-nums ${current ? "text-slate-900" : "text-slate-300"}`}>{formatClock(current ? elapsed : 0)}</div>
+            <div className={`text-7xl font-light tabular-nums tracking-tight ${current ? "text-slate-900" : "text-slate-300"}`}>{formatClock(current ? elapsed : 0)}</div>
             {current ? (
               <div>
                 <div className="text-lg font-medium">{current.taskTitle}</div>
@@ -86,7 +86,7 @@ export function TimerPanel({ tasks, initial, preselectTaskId, manualEnabled, pro
               {current && current.taskId !== selected ? <button className="btn-secondary" disabled={busy} onClick={() => call("/api/timer/stop")}>■ Stop current</button> : null}
             </div>
             {selectedTask && !current ? <p className="text-xs text-slate-400">Will track {selectedTask.title}</p> : null}
-            {error ? <p className="rounded-md bg-rose-50 px-3 py-2 text-sm text-rose-700">{error}</p> : null}
+            {error ? <p className="rounded-sharp bg-rose-50 px-3 py-2 text-sm text-rose-700">{error}</p> : null}
           </div>
         </Card>
         <p className="text-xs text-slate-500">Idle detection ({idleTimeoutMinutes} min) runs in the desktop agent, which asks whether to keep or discard idle time. Time is never removed automatically.</p>

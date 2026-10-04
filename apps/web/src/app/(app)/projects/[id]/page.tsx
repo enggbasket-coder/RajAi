@@ -40,7 +40,7 @@ export default async function ProjectDetail({ params }: { params: Promise<{ id: 
                 <tbody>
                   {project.tasks.map((t) => (
                     <tr key={t.id}>
-                      <td><Link href={`/tasks/${t.id}`} className="font-medium text-brand-700 hover:underline">{t.title}</Link></td>
+                      <td><Link href={`/tasks/${t.id}`} className="font-medium text-slate-900 hover:text-brand-600">{t.title}</Link></td>
                       <td><Badge value={t.status} /></td>
                       <td><Badge value={t.priority} /></td>
                       <td className="text-slate-600">{t.assignments.filter((a) => a.status !== "CANCELLED").map((a) => members.find((m) => m.userId === a.userId)?.name ?? "?").join(", ") || "—"}</td>

@@ -15,7 +15,7 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
         <Link className="text-brand-600 hover:underline" href="/forgot-password">Forgot password?</Link>
         <Link className="text-brand-600 hover:underline" href="/register">Create an organization</Link>
       </div>
-      <p className="mt-4 rounded-md bg-slate-50 p-3 text-xs text-slate-500">
+      <p className="mt-4 rounded-sharp bg-slate-50 p-3 text-xs text-slate-500">
         Demo accounts (password <code>password123</code>): owner@, manager@, akhil@, priya@trackwise.demo
       </p>
     </>

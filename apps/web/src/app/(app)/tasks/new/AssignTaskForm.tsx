@@ -135,7 +135,7 @@ export function AssignTaskForm({ projects, members, defaultProjectId, defaultBil
             ))}
           </div>
           <p className="mt-3 text-xs text-slate-500">Channels that are not ready fail with a clear reason and can be retried from the task page. Fallback to the other channel only happens if the organization allows it.</p>
-          {error ? <p className="mt-3 rounded-md bg-rose-50 px-3 py-2 text-sm text-rose-700">{error}</p> : null}
+          {error ? <p className="mt-3 rounded-sharp bg-rose-50 px-3 py-2 text-sm text-rose-700">{error}</p> : null}
           <div className="mt-4 flex flex-col gap-2">
             <button type="submit" name="intent" value="assign" className="btn-primary" disabled={busy || !projectId || assignees.length === 0}>{busy ? "Sending…" : "Assign & Send"}</button>
             <button type="submit" name="intent" value="draft" className="btn-secondary" disabled={busy || !projectId}>Save Draft</button>

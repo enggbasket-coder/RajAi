@@ -24,7 +24,7 @@ export default async function ClientDetail({ params }: { params: Promise<{ id: s
                 <tbody>
                   {client.projects.map((p) => (
                     <tr key={p.id}>
-                      <td><Link href={`/projects/${p.id}`} className="font-medium text-brand-700 hover:underline">{p.name}</Link></td>
+                      <td><Link href={`/projects/${p.id}`} className="font-medium text-slate-900 hover:text-brand-600">{p.name}</Link></td>
                       <td className="text-slate-500">{p.code ?? "—"}</td>
                       <td><Badge value={p.status} /></td>
                       <td>{p.billable ? "Yes" : "No"}</td>

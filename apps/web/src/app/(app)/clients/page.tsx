@@ -22,7 +22,7 @@ export default async function ClientsPage() {
                 <tbody>
                   {clients.map((c) => (
                     <tr key={c.id}>
-                      <td><Link href={`/clients/${c.id}`} className="font-medium text-brand-700 hover:underline">{c.name}</Link></td>
+                      <td><Link href={`/clients/${c.id}`} className="font-medium text-slate-900 hover:text-brand-600">{c.name}</Link></td>
                       <td className="text-slate-500">{c.code ?? "—"}</td>
                       <td>{c._count.projects}</td>
                       <td>{c.active ? <span className="badge bg-emerald-100 text-emerald-800">Active</span> : <span className="badge bg-slate-200 text-slate-600">Inactive</span>}</td>

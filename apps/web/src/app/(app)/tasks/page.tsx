@@ -34,7 +34,7 @@ export default async function TasksPage({ searchParams }: { searchParams: Promis
             <tbody>
               {tasks.map((t) => (
                 <tr key={t.id}>
-                  <td><Link href={`/tasks/${t.id}`} className="font-medium text-brand-700 hover:underline">{t.title}</Link></td>
+                  <td><Link href={`/tasks/${t.id}`} className="font-medium text-slate-900 hover:text-brand-600">{t.title}</Link></td>
                   <td className="text-slate-600">{t.project.name}</td>
                   <td className="text-slate-600">
                     {t.assignments.filter((a) => a.status !== "CANCELLED").map((a) => (

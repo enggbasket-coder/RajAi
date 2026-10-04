@@ -70,8 +70,8 @@ export function JsonForm({ action, method = "POST", children, submitLabel = "Sav
   return (
     <form onSubmit={onSubmit} className={className}>
       {children}
-      {error ? <p className="mt-3 rounded-md bg-rose-50 px-3 py-2 text-sm text-rose-700">{error}</p> : null}
-      {ok ? <p className="mt-3 rounded-md bg-emerald-50 px-3 py-2 text-sm text-emerald-700">{ok}</p> : null}
+      {error ? <p className="mt-3 rounded-sharp bg-rose-50 px-3 py-2 text-sm text-rose-700">{error}</p> : null}
+      {ok ? <p className="mt-3 rounded-sharp bg-emerald-50 px-3 py-2 text-sm text-emerald-700">{ok}</p> : null}
       <div className="mt-4 flex items-center gap-2">
         <button type="submit" className={submitClassName} disabled={busy}>
           {busy ? "Working…" : submitLabel}

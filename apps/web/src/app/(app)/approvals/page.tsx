@@ -27,7 +27,7 @@ export default async function ApprovalsPage({ searchParams }: { searchParams: Pr
               {sheets.map((t) => (
                 <tr key={t.id}>
                   <td className="font-medium">{t.userName}{t.userId === actor.userId ? <span className="ml-1 text-xs text-slate-400">(you)</span> : null}</td>
-                  <td><Link href={`/timesheets/weekly?date=${t.weekStart.toISOString().slice(0, 10)}&userId=${t.userId}`} className="text-brand-700 hover:underline">{formatDate(t.weekStart, org.timezone)}</Link></td>
+                  <td><Link href={`/timesheets/weekly?date=${t.weekStart.toISOString().slice(0, 10)}&userId=${t.userId}`} className="text-slate-900 hover:text-brand-600">{formatDate(t.weekStart, org.timezone)}</Link></td>
                   <td>{formatDuration(t.totalSeconds)}</td>
                   <td>{t.entries.filter((e) => e.manual).length ? <span className="badge bg-amber-100 text-amber-800">{t.entries.filter((e) => e.manual).length} manual</span> : "—"}</td>
                   <td><Badge value={t.status} />{t.reviewComment ? <div className="text-xs text-slate-500">“{t.reviewComment}”</div> : null}</td>

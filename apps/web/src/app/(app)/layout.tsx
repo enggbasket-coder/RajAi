@@ -6,8 +6,8 @@ import { requireActor } from "@/lib/session";
 import { Heartbeat } from "@/components/Heartbeat";
 import { Nav, type NavItem } from "@/components/Nav";
 import { OrgSwitcher } from "@/components/OrgSwitcher";
-import { Badge } from "@/components/ui";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { Avatar } from "@/components/ui";
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const actor = await requireActor();
@@ -18,67 +18,75 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   const devTools = process.env.ENABLE_DEV_TOOLS === "true";
 
   const work: NavItem[] = [
-    ...(managerial ? [{ href: "/dashboard", label: "Dashboard", icon: "◫" }] : []),
-    { href: "/my-tasks", label: "My Tasks", icon: "☑" },
-    { href: "/timer", label: "Timer", icon: "⏱" },
-    { href: "/timesheets/daily", label: "Daily timesheet", icon: "▤" },
-    { href: "/timesheets/weekly", label: "Weekly timesheet", icon: "▦" },
+    ...(managerial ? [{ href: "/dashboard", label: "Dashboard" }] : []),
+    { href: "/my-tasks", label: "My Tasks" },
+    { href: "/timer", label: "Timer" },
+    { href: "/timesheets/daily", label: "Daily" },
+    { href: "/timesheets/weekly", label: "Weekly" },
   ];
   const manage: NavItem[] = managerial
     ? [
-        { href: "/tasks", label: "Tasks", icon: "≣" },
-        { href: "/tasks/new", label: "New assignment", icon: "＋" },
-        { href: "/projects", label: "Projects", icon: "▣" },
-        { href: "/clients", label: "Clients", icon: "◈" },
-        { href: "/live-team", label: "Live Team", icon: "●" },
-        { href: "/approvals", label: "Approvals", icon: "✓" },
-        { href: "/reports", label: "Reports", icon: "▥" },
+        { href: "/tasks", label: "Tasks" },
+        { href: "/tasks/new", label: "New assignment" },
+        { href: "/projects", label: "Projects" },
+        { href: "/clients", label: "Clients" },
+        { href: "/live-team", label: "Live Team" },
+        { href: "/approvals", label: "Approvals" },
+        { href: "/reports", label: "Reports" },
       ]
-    : [{ href: "/reports", label: "My reports", icon: "▥" }];
+    : [{ href: "/reports", label: "My reports" }];
   const settings: NavItem[] = [
-    { href: "/settings/profile", label: "My messaging", icon: "✉" },
-    ...(managerial ? [{ href: "/members", label: "Members", icon: "👥" }] : []),
+    { href: "/settings/profile", label: "My messaging" },
+    ...(managerial ? [{ href: "/members", label: "Members" }] : []),
     ...(admin
       ? [
-          { href: "/settings/messaging", label: "Messaging settings", icon: "⚙" },
-          { href: "/settings/organization", label: "Organization", icon: "🏢" },
-          { href: "/audit-log", label: "Audit log", icon: "▤" },
-          ...(devTools ? [{ href: "/dev/messaging", label: "Mock console", icon: "🧪" }] : []),
+          { href: "/settings/messaging", label: "Messaging" },
+          { href: "/settings/organization", label: "Organization" },
+          { href: "/audit-log", label: "Audit log" },
+          ...(devTools ? [{ href: "/dev/messaging", label: "Mock console" }] : []),
         ]
       : []),
   ];
+  const now = new Date();
+  const day = new Intl.DateTimeFormat("en-GB", { timeZone: org.timezone, day: "numeric" }).format(now);
+  const dateLabel = `${new Intl.DateTimeFormat("en-GB", { timeZone: org.timezone, weekday: "short" }).format(now)}, ${new Intl.DateTimeFormat("en-GB", { timeZone: org.timezone, month: "long" }).format(now)}`;
 
   return (
-    <div className="flex min-h-screen">
+    <div className="min-h-screen p-3 md:p-5">
       <Heartbeat />
-      <aside className="sticky top-0 hidden h-screen w-60 shrink-0 flex-col overflow-y-auto border-r border-slate-200 bg-white/80 px-3 py-4 backdrop-blur md:flex">
-        <div className="mb-4 px-3">
-          <div className="flex items-center justify-between">
-            <Link href="/dashboard" className="flex items-center gap-2 text-base font-bold tracking-tight text-slate-900">
-              <span className="inline-block h-5 w-5 rounded-[5px] bg-gradient-to-br from-indigo-500 to-cyan-400 shadow-glow" />
-              Trackwise
+      <div className="frame mx-auto max-w-[1540px] overflow-hidden">
+        <header className="flex flex-wrap items-center justify-between gap-4 px-6 pt-5 md:px-8">
+          <div className="flex items-center gap-4">
+            <Link href="/dashboard" className="flex items-center gap-3">
+              <span className="inline-flex h-11 w-11 items-center justify-center rounded-full bg-ink text-lg font-semibold text-white dark:text-[#0a0e17]">T</span>
+              <span className="leading-tight">
+                <span className="block text-base font-medium text-slate-900">Trackwise</span>
+                <span className="block text-sm text-slate-500">{org.name}</span>
+              </span>
             </Link>
-            <ThemeToggle compact />
+            {memberships.length > 1 ? <div className="hidden md:block"><OrgSwitcher current={actor.organizationId} organizations={memberships.map((m) => ({ id: m.organizationId, name: m.organization.name }))} /></div> : null}
           </div>
-          <div className="mt-2">
-            <OrgSwitcher current={actor.organizationId} organizations={memberships.map((m) => ({ id: m.organizationId, name: m.organization.name }))} />
+          <div className="flex items-center gap-3">
+            <div className="hidden items-center gap-3 rounded-full border border-slate-200 py-1 pl-1 pr-4 lg:flex">
+              <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-slate-100 text-sm font-medium text-slate-900">{day}</span>
+              <span className="text-sm text-slate-600">{dateLabel}</span>
+            </div>
+            <ThemeToggle />
+            <div className="flex items-center gap-3 rounded-full border border-slate-200 py-1 pl-1 pr-4">
+              <Avatar name={actor.user.name} size={36} />
+              <span className="hidden leading-tight sm:block">
+                <span className="block text-sm font-medium text-slate-900">{actor.user.name}</span>
+                <span className="block text-xs capitalize text-slate-500">{actor.role.toLowerCase()}</span>
+              </span>
+              <a href="/api/auth/logout" className="ml-1 text-xs text-slate-400 hover:text-slate-700">Sign out</a>
+            </div>
           </div>
+        </header>
+        <div className="px-6 pb-4 pt-4 md:px-8">
+          <Nav sections={[{ title: "Work", items: work }, { title: managerial ? "Manage" : "Insights", items: manage }, { title: "Settings", items: settings }]} />
         </div>
-        <Nav sections={[{ title: "Work", items: work }, { title: managerial ? "Manage" : "Insights", items: manage }, { title: "Settings", items: settings }]} />
-        <div className="mt-auto border-t border-slate-100 px-3 pt-3 text-xs text-slate-500">
-          <div className="truncate font-medium text-slate-700">{actor.user.name}</div>
-          <div className="truncate">{actor.user.email}</div>
-          <div className="mt-1 flex items-center justify-between">
-            <Badge value={actor.role} />
-            <a href="/api/auth/logout" className="hover:underline">Sign out</a>
-          </div>
-          <div className="mt-2 text-[11px] text-slate-400">TZ {org.timezone}</div>
-        </div>
-      </aside>
-      <main className="min-w-0 flex-1 p-6 md:p-8">
-        <div className="mb-4 flex items-center justify-end md:hidden"><ThemeToggle /></div>
-        <div className="mx-auto max-w-6xl">{children}</div>
-      </main>
+        <main className="rounded-t-frame bg-slate-50 px-6 py-6 md:px-8 md:py-8">{children}</main>
+      </div>
     </div>
   );
 }

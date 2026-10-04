@@ -31,7 +31,7 @@ export default async function OrganizationSettings() {
           <JsonForm action="/api/organizations/current" method="PATCH" submitLabel="Save" className="space-y-3" successMessage="Saved">
             <label className="flex items-center gap-2 text-sm"><input type="checkbox" name="manualTimeEnabled" defaultChecked={org.manualTimeEnabled} /> Employees may add manual time (reason required, always marked)</label>
             <Field label="Idle threshold (minutes)" hint="The desktop agent prompts to keep or discard idle time after this long without input. Never automatic."><input name="idleTimeoutMinutes" type="number" min={1} max={240} className="input" defaultValue={org.idleTimeoutMinutes} /></Field>
-            <div className="rounded-md bg-slate-50 p-3 text-xs text-slate-600">
+            <div className="rounded-sharp bg-slate-50 p-3 text-xs text-slate-600">
               <div className="font-medium text-slate-700">Monitoring (Phase 2)</div>
               Activity %, screenshots and app/URL tracking are <strong>off</strong> and cannot be enabled in the MVP. Trackwise never records keystrokes, clipboard, webcam or audio.
             </div>

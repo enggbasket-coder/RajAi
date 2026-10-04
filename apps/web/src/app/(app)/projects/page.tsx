@@ -24,7 +24,7 @@ export default async function ProjectsPage({ searchParams }: { searchParams: Pro
                 <tbody>
                   {projects.map((p) => (
                     <tr key={p.id}>
-                      <td><Link href={`/projects/${p.id}`} className="font-medium text-brand-700 hover:underline">{p.name}</Link>{p.code ? <span className="ml-1 text-xs text-slate-400">{p.code}</span> : null}</td>
+                      <td><Link href={`/projects/${p.id}`} className="font-medium text-slate-900 hover:text-brand-600">{p.name}</Link>{p.code ? <span className="ml-1 text-xs text-slate-400">{p.code}</span> : null}</td>
                       <td className="text-slate-600">{p.client?.name ?? "—"}</td>
                       <td><Badge value={p.status} /></td>
                       <td>{p._count.tasks}</td>
