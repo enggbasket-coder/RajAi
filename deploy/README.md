@@ -1,9 +1,9 @@
-# Deploying Trackwise to trackwise.plusbrains.in
+# Deploying Trackwise to trackwise.plusbrains.ai
 
 Target: one Linux VM (Ubuntu 22.04/24.04, 2 vCPU / 4 GB is plenty) with Docker Engine + Compose plugin.
 
 ## 1. DNS
-Create an **A record** `trackwise.plusbrains.in → <server public IP>` (and AAAA if IPv6). Open inbound **80** and **443** in the firewall / security group. Caddy needs port 80 reachable to obtain the certificate.
+Create an **A record** `trackwise.plusbrains.ai → <server public IP>` (and AAAA if IPv6). Open inbound **80** and **443** in the firewall / security group. Caddy needs port 80 reachable to obtain the certificate.
 
 ## 2. Server prerequisites
 ```bash
@@ -29,14 +29,14 @@ Keep `SEED_DEMO=true` for the first start if you want the demo organization and 
 ```bash
 ./deploy/deploy.sh
 ```
-First build takes a few minutes. The web container applies Prisma migrations on every start, then serves on port 3000 behind Caddy, which issues the Let's Encrypt certificate for `trackwise.plusbrains.in` automatically.
+First build takes a few minutes. The web container applies Prisma migrations on every start, then serves on port 3000 behind Caddy, which issues the Let's Encrypt certificate for `trackwise.plusbrains.ai` automatically.
 
-Open https://trackwise.plusbrains.in → sign in with `owner@trackwise.demo / password123` (demo seed) or **Create an organization**. Change the demo passwords or delete the demo org before inviting real users.
+Open https://trackwise.plusbrains.ai → sign in with `owner@trackwise.demo / password123` (demo seed) or **Create an organization**. Change the demo passwords or delete the demo org before inviting real users.
 
 ## 6. Go live with real messaging
 1. In Trackwise: *Messaging settings → WhatsApp → Configure* (phone number ID, WABA ID, access token, app secret, verify token, optional template). In `.env` set `WHATSAPP_PROVIDER=meta`, then `docker compose up -d web`.
-2. In Meta → WhatsApp → Configuration: callback URL `https://trackwise.plusbrains.in/api/webhooks/whatsapp`, your verify token, subscribe to `messages`.
-3. In Trackwise: *Messaging settings → Telegram → Configure* with the BotFather token. Set `TELEGRAM_PROVIDER=telegram` in `.env` and restart `web`. Trackwise registers `https://trackwise.plusbrains.in/api/webhooks/telegram/<connectionId>` itself.
+2. In Meta → WhatsApp → Configuration: callback URL `https://trackwise.plusbrains.ai/api/webhooks/whatsapp`, your verify token, subscribe to `messages`.
+3. In Trackwise: *Messaging settings → Telegram → Configure* with the BotFather token. Set `TELEGRAM_PROVIDER=telegram` in `.env` and restart `web`. Trackwise registers `https://trackwise.plusbrains.ai/api/webhooks/telegram/<connectionId>` itself.
 4. Employees opt in to WhatsApp and link Telegram from *My messaging*.
 
 ## Operations
