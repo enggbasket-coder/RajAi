@@ -1,4 +1,6 @@
 import { prisma } from "@trackwise/database";
+import { listMemberships } from "@trackwise/auth";
+import { OrgList } from "./OrgList";
 import { requireActor } from "@/lib/session";
 import { JsonForm } from "@/components/forms";
 import { Avatar, Badge, Card, Field, PageHeader } from "@/components/ui";
@@ -8,6 +10,7 @@ export const dynamic = "force-dynamic";
 export default async function AccountPage() {
   const actor = await requireActor();
   const member = await prisma.organizationMember.findFirstOrThrow({ where: { organizationId: actor.organizationId, userId: actor.userId } });
+  const memberships = await listMemberships(actor.userId);
   return (
     <>
       <PageHeader title="My account" subtitle="Your profile, display name in this organization and password." />
@@ -35,6 +38,19 @@ export default async function AccountPage() {
               </select>
             </Field>
           </JsonForm>
+        </Card>
+        <Card title="Organizations" className="lg:col-span-3" actions={<span className="text-xs text-slate-500">{memberships.length} total</span>}>
+          <div className="grid gap-6 md:grid-cols-2">
+            <OrgList current={actor.organizationId} organizations={memberships.map((m) => ({ id: m.organizationId, name: m.organization.name, role: m.role }))} />
+            <div id="new-organization">
+              <div className="mb-2 text-sm font-medium text-slate-900">Create a new organization</div>
+              <p className="mb-3 text-xs text-slate-500">You become its owner. Each organization has its own members, projects, messaging channels and data.</p>
+              <JsonForm action="/api/organizations" submitLabel="Create organization" redirectTo="/dashboard" className="space-y-3">
+                <Field label="Organization name"><input name="name" className="input" required placeholder="Acme Studio" /></Field>
+                <Field label="Timezone"><input name="timezone" className="input" defaultValue={actor.user.timezone ?? "Asia/Kolkata"} required /></Field>
+              </JsonForm>
+            </div>
+          </div>
         </Card>
         <Card title="Change password">
           <JsonForm action="/api/auth/change-password" submitLabel="Update password" className="space-y-3" successMessage="Password updated">

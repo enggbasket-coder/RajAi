@@ -65,7 +65,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
                 <span className="block text-sm text-slate-500">{org.name}</span>
               </span>
             </Link>
-            {memberships.length > 1 ? <div className="hidden md:block"><OrgSwitcher current={actor.organizationId} organizations={memberships.map((m) => ({ id: m.organizationId, name: m.organization.name }))} /></div> : null}
+            <div className="hidden md:block"><OrgSwitcher current={actor.organizationId} organizations={memberships.map((m) => ({ id: m.organizationId, name: m.organization.name }))} /></div>
           </div>
           <div className="flex items-center gap-3">
             <div className="hidden items-center gap-3 rounded-full border border-slate-200 py-1 pl-1 pr-4 lg:flex">
