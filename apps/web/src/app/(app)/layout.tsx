@@ -7,6 +7,7 @@ import { Heartbeat } from "@/components/Heartbeat";
 import { Nav, type NavItem } from "@/components/Nav";
 import { OrgSwitcher } from "@/components/OrgSwitcher";
 import { Badge } from "@/components/ui";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const actor = await requireActor();
@@ -50,9 +51,15 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   return (
     <div className="flex min-h-screen">
       <Heartbeat />
-      <aside className="hidden w-60 shrink-0 flex-col border-r border-slate-200 bg-white px-3 py-4 md:flex">
+      <aside className="sticky top-0 hidden h-screen w-60 shrink-0 flex-col overflow-y-auto border-r border-slate-200 bg-white/80 px-3 py-4 backdrop-blur md:flex">
         <div className="mb-4 px-3">
-          <Link href="/dashboard" className="text-lg font-bold tracking-tight text-brand-700">Trackwise</Link>
+          <div className="flex items-center justify-between">
+            <Link href="/dashboard" className="flex items-center gap-2 text-base font-bold tracking-tight text-slate-900">
+              <span className="inline-block h-5 w-5 rounded-[5px] bg-gradient-to-br from-indigo-500 to-cyan-400 shadow-glow" />
+              Trackwise
+            </Link>
+            <ThemeToggle compact />
+          </div>
           <div className="mt-2">
             <OrgSwitcher current={actor.organizationId} organizations={memberships.map((m) => ({ id: m.organizationId, name: m.organization.name }))} />
           </div>
@@ -69,6 +76,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
         </div>
       </aside>
       <main className="min-w-0 flex-1 p-6 md:p-8">
+        <div className="mb-4 flex items-center justify-end md:hidden"><ThemeToggle /></div>
         <div className="mx-auto max-w-6xl">{children}</div>
       </main>
     </div>
