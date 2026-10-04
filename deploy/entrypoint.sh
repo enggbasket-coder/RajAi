@@ -10,4 +10,4 @@ if [ "$SEED_DEMO" = "true" ]; then
 fi
 cd /app
 echo "[trackwise] starting web on :${PORT:-3000}"
-exec pnpm --filter @trackwise/web start -- -p "${PORT:-3000}"
+cd /app/apps/web && exec npx next start -p "${PORT:-3000}"
