@@ -30,7 +30,10 @@ services:
     expose:
       - "3000"
 
+  # Bundled reverse proxy. Started only with `docker compose --profile caddy up -d`.
+  # Skip it when the host already runs a reverse proxy (see deploy/README.md).
   caddy:
+    profiles: ["caddy"]
     image: caddy:2-alpine
     restart: unless-stopped
     ports:

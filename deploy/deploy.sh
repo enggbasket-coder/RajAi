@@ -7,7 +7,8 @@ if [ ! -f .env ]; then
 fi
 if [ -d .git ]; then git pull --ff-only; fi
 docker compose build web
-docker compose up -d
+# Set WITH_CADDY=1 to also run the bundled Caddy (only when nothing else owns ports 80/443).
+if [ "${WITH_CADDY:-0}" = "1" ]; then docker compose --profile caddy up -d; else docker compose up -d; fi
 docker compose ps
 echo
 echo "Tailing web logs (Ctrl-C to stop)…"

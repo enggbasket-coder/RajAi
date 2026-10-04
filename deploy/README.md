@@ -27,7 +27,8 @@ Keep `SEED_DEMO=true` for the first start if you want the demo organization and 
 
 ## 5. Launch
 ```bash
-./deploy/deploy.sh
+WITH_CADDY=1 ./deploy/deploy.sh     # fresh server: bundled Caddy serves HTTPS on 80/443
+./deploy/deploy.sh                  # server with an existing reverse proxy: web + db only
 ```
 First build takes a few minutes. The web container applies Prisma migrations on every start, then serves on port 3000 behind Caddy, which issues the Let's Encrypt certificate for `trackwise.plusbrains.ai` automatically.
 
@@ -51,5 +52,13 @@ Open https://trackwise.plusbrains.ai → sign in with `owner@trackwise.demo / pa
 | Re-run seed manually | `docker compose exec web sh -c "cd packages/database && npx tsx prisma/seed.ts"` |
 
 ## Using an existing reverse proxy or managed Postgres
-- Already running nginx/Traefik on the host? Remove the `caddy` service, publish `web` on `127.0.0.1:3000:3000` and proxy to it; keep `APP_URL` as the public HTTPS URL.
+- Host already runs a Caddy container (e.g. `excel-caddy`)? Run `./deploy/deploy.sh` without `WITH_CADDY`, then `docker network connect trackwise_default <caddy-container>` and add to its Caddyfile:
+  ```
+  trackwise.plusbrains.ai {
+  	encode zstd gzip
+  	reverse_proxy trackwise-web-1:3000
+  }
+  ```
+  followed by `docker exec <caddy-container> caddy reload --config /etc/caddy/Caddyfile`.
+- Running nginx/Traefik on the host instead? Publish `web` on `127.0.0.1:3000:3000` and proxy to it; keep `APP_URL` as the public HTTPS URL.
 - Managed Postgres (RDS, Supabase, Neon…)? Remove the `db` service and set `DATABASE_URL` directly in `.env` (remove the derived value from `docker-compose.yml`).
