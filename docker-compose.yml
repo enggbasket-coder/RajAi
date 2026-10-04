@@ -1,4 +1,4 @@
-# Production stack for trackwise.plusbrains.com: Postgres + Trackwise web + Caddy (automatic HTTPS).
+# Production stack for trackwise.plusbrains.in: Postgres + Trackwise web + Caddy (automatic HTTPS).
 # Usage: cp deploy/.env.production.example .env && edit → docker compose up -d --build
 services:
   db:
@@ -37,7 +37,7 @@ services:
       - "80:80"
       - "443:443"
     environment:
-      APP_DOMAIN: ${APP_DOMAIN:-trackwise.plusbrains.com}
+      APP_DOMAIN: ${APP_DOMAIN:-trackwise.plusbrains.in}
     volumes:
       - ./deploy/Caddyfile:/etc/caddy/Caddyfile:ro
       - caddy_data:/data
