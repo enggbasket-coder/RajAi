@@ -36,6 +36,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
       ]
     : [{ href: "/reports", label: "My reports" }];
   const settings: NavItem[] = [
+    { href: "/settings/account", label: "My account" },
     { href: "/settings/profile", label: "My messaging" },
     ...(managerial ? [{ href: "/members", label: "Members" }] : []),
     ...(admin
@@ -73,11 +74,13 @@ export default async function AppLayout({ children }: { children: React.ReactNod
             </div>
             <ThemeToggle />
             <div className="flex items-center gap-3 rounded-full border border-slate-200 py-1 pl-1 pr-4">
+              <Link href="/settings/account" className="flex items-center gap-3" title="My account">
               <Avatar name={actor.user.name} size={36} />
               <span className="hidden leading-tight sm:block">
                 <span className="block text-sm font-medium text-slate-900">{actor.user.name}</span>
                 <span className="block text-xs capitalize text-slate-500">{actor.role.toLowerCase()}</span>
               </span>
+              </Link>
               <a href="/api/auth/logout" className="ml-1 text-xs text-slate-400 hover:text-slate-700">Sign out</a>
             </div>
           </div>

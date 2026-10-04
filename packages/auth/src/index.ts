@@ -123,4 +123,16 @@ export async function resetPassword(token: string, newPassword: string) {
   return row.userId;
 }
 
+export async function updateProfile(userId: string, input: { name?: string; timezone?: string | null }) {
+  if (input.name !== undefined && !input.name.trim()) throw new AppError("VALIDATION", "Name is required");
+  return prisma.user.update({ where: { id: userId }, data: { ...(input.name !== undefined ? { name: input.name.trim() } : {}), ...(input.timezone !== undefined ? { timezone: input.timezone || null } : {}) } });
+}
+
+export async function changePassword(userId: string, currentPassword: string, newPassword: string) {
+  if (newPassword.length < 8) throw new AppError("VALIDATION", "New password must be at least 8 characters");
+  const user = await prisma.user.findUniqueOrThrow({ where: { id: userId } });
+  if (!verifyPassword(currentPassword, user.passwordHash)) throw new AppError("VALIDATION", "Current password is incorrect");
+  await prisma.user.update({ where: { id: userId }, data: { passwordHash: hashPassword(newPassword) } });
+}
+
 export type { DbRole };

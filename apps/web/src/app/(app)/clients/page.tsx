@@ -18,7 +18,7 @@ export default async function ClientsPage() {
           <Card>
             {clients.length === 0 ? <Empty>No clients yet.</Empty> : (
               <table className="table">
-                <thead><tr><th>Name</th><th>Code</th><th>Projects</th><th>Status</th></tr></thead>
+                <thead><tr><th>Name</th><th>Code</th><th>Projects</th><th>Status</th><th></th></tr></thead>
                 <tbody>
                   {clients.map((c) => (
                     <tr key={c.id}>
@@ -26,6 +26,7 @@ export default async function ClientsPage() {
                       <td className="text-slate-500">{c.code ?? "—"}</td>
                       <td>{c._count.projects}</td>
                       <td>{c.active ? <span className="badge bg-emerald-100 text-emerald-800">Active</span> : <span className="badge bg-slate-200 text-slate-600">Inactive</span>}</td>
+                      <td className="text-right"><Link href={`/clients/${c.id}`} className="btn-secondary btn-sm">{hasPermission(actor.role, "clients:write") ? "Edit" : "Open"}</Link></td>
                     </tr>
                   ))}
                 </tbody>

@@ -21,7 +21,7 @@ export default async function MembersPage() {
             <thead><tr><th>Member</th><th>Role</th><th>WhatsApp</th><th>Telegram</th><th>Preferred channel</th><th>Status</th>{admin ? <th></th> : null}</tr></thead>
             <tbody>
               {members.map((m) => (
-                <MemberRow key={m.userId} member={{ ...m, lastSeenAt: m.lastSeenAt?.toISOString() ?? null }} canManage={admin && m.userId !== actor.userId} roles={assignableRoles(actor.role)} />
+                <MemberRow key={m.userId} member={{ ...m, lastSeenAt: m.lastSeenAt?.toISOString() ?? null }} canManage={admin && m.userId !== actor.userId && m.role !== "OWNER"} canRename={admin || m.userId === actor.userId} roles={assignableRoles(actor.role)} />
               ))}
             </tbody>
           </table>

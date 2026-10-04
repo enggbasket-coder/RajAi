@@ -5,7 +5,9 @@ import { isManagerial } from "@trackwise/rbac";
 import { prisma } from "@trackwise/database";
 import { requireActor } from "@/lib/session";
 import { formatDateTime, formatDuration } from "@/lib/format";
-import { ActionButton } from "@/components/forms";
+import { ActionButton, JsonForm } from "@/components/forms";
+import { Field } from "@/components/ui";
+import { toLocalInputValue } from "@/lib/datetime";
 import { Badge, Card, Empty, PageHeader, Tabs } from "@/components/ui";
 import { AssignMoreForm, RespondButtons } from "./TaskActions";
 
@@ -105,6 +107,20 @@ export default async function TaskDetail({ params, searchParams }: { params: Pro
             {managerial && task.status !== "COMPLETED" && task.status !== "CANCELLED" ? (
               <Card title="Assign more people">
                 <AssignMoreForm taskId={task.id} members={members.filter((m) => m.active && !live.some((a) => a.userId === m.userId)).map((m) => ({ userId: m.userId, name: m.name, wa: m.channels.whatsapp.ready, tg: m.channels.telegram.ready }))} />
+              </Card>
+            ) : null}
+            {managerial && task.status !== "COMPLETED" && task.status !== "CANCELLED" ? (
+              <Card title="Edit task">
+                <JsonForm action={`/api/tasks/${task.id}`} method="PATCH" submitLabel="Save changes" className="space-y-3" successMessage="Task updated">
+                  <Field label="Title"><input name="title" className="input" defaultValue={task.title} required /></Field>
+                  <Field label="Description"><textarea name="description" className="input" rows={3} defaultValue={task.description ?? ""} /></Field>
+                  <Field label="Due date/time"><input name="dueAt" type="datetime-local" className="input" defaultValue={toLocalInputValue(task.dueAt, tz)} /></Field>
+                  <div className="grid grid-cols-2 gap-3">
+                    <Field label="Estimate (minutes)"><input name="estimatedMinutes" type="number" min={0} step={15} className="input" defaultValue={task.estimatedMinutes ?? ""} /></Field>
+                    <Field label="Priority"><select name="priority" className="input" defaultValue={task.priority}>{["LOW", "NORMAL", "HIGH", "URGENT"].map((p) => <option key={p}>{p}</option>)}</select></Field>
+                  </div>
+                  <label className="flex items-center gap-2 text-sm"><input type="checkbox" name="billable" defaultChecked={task.billable} /> Billable</label>
+                </JsonForm>
               </Card>
             ) : null}
             <Card title="Details">

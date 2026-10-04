@@ -1,12 +1,12 @@
 import { z } from "zod";
 import { TaskService, createAndAssignTask } from "@trackwise/core";
-import { json, optionalDate, parseBody, withActor } from "@/lib/api";
+import { dateInTz, json, orgTimeZone, parseBody, withActor } from "@/lib/api";
 
 const createSchema = z.object({
   projectId: z.string().min(1),
   title: z.string().min(1),
   description: z.string().nullable().optional(),
-  dueAt: z.any().optional().transform(optionalDate),
+  dueAt: z.any().optional(),
   estimatedMinutes: z.number().int().nullable().optional(),
   priority: z.enum(["LOW", "NORMAL", "HIGH", "URGENT"]).optional(),
   billable: z.boolean().optional(),
@@ -22,6 +22,7 @@ export const GET = withActor(async (req, actor) => {
 
 export const POST = withActor(async (req, actor) => {
   const body = await parseBody(req, createSchema);
-  const { task, sends } = await createAndAssignTask(actor, { ...body, draft: body.intent === "draft" });
+  const tz = await orgTimeZone(actor.organizationId);
+  const { task, sends } = await createAndAssignTask(actor, { ...body, dueAt: dateInTz(body.dueAt, tz), draft: body.intent === "draft" });
   return json({ task, sends }, { status: 201 });
 });

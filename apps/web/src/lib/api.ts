@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { AppError } from "@trackwise/shared";
+import { AppError, zonedToUtc } from "@trackwise/shared";
+import { prisma } from "@trackwise/database";
 import type { Actor, AuthUser } from "@trackwise/auth";
 import { getCurrentActor, getCurrentUser } from "./session";
 import { ZodError, type ZodType } from "zod";
@@ -61,3 +62,23 @@ export async function parseBody<T>(req: NextRequest, schema: ZodType<T, any, any
 }
 
 export const optionalDate = (v: unknown) => (v === "" || v === null || v === undefined ? null : new Date(String(v)));
+
+const LOCAL_INPUT = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})(?::(\d{2}))?$/;
+
+/**
+ * Parse a date value from the client. Values from <input type="datetime-local"> carry no offset, so they are
+ * interpreted in the organization's timezone; ISO strings with Z/offset are parsed as-is.
+ */
+export function dateInTz(v: unknown, timeZone: string): Date | null {
+  if (v === "" || v === null || v === undefined) return null;
+  const str = String(v);
+  const m = LOCAL_INPUT.exec(str);
+  if (m) return zonedToUtc(timeZone, Number(m[1]), Number(m[2]), Number(m[3]), Number(m[4]), Number(m[5]), Number(m[6] ?? 0));
+  const d = new Date(str);
+  return Number.isNaN(d.getTime()) ? null : d;
+}
+
+export async function orgTimeZone(organizationId: string): Promise<string> {
+  const org = await prisma.organization.findUnique({ where: { id: organizationId }, select: { timezone: true } });
+  return org?.timezone ?? "UTC";
+}

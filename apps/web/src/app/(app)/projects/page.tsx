@@ -20,7 +20,7 @@ export default async function ProjectsPage({ searchParams }: { searchParams: Pro
           <Card>
             {projects.length === 0 ? <Empty>No projects yet.</Empty> : (
               <table className="table">
-                <thead><tr><th>Project</th><th>Client</th><th>Status</th><th>Tasks</th><th>Billable</th></tr></thead>
+                <thead><tr><th>Project</th><th>Client</th><th>Status</th><th>Tasks</th><th>Billable</th><th></th></tr></thead>
                 <tbody>
                   {projects.map((p) => (
                     <tr key={p.id}>
@@ -29,6 +29,7 @@ export default async function ProjectsPage({ searchParams }: { searchParams: Pro
                       <td><Badge value={p.status} /></td>
                       <td>{p._count.tasks}</td>
                       <td>{p.billable ? "Yes" : "No"}</td>
+                      <td className="text-right"><Link href={`/projects/${p.id}`} className="btn-secondary btn-sm">{canWrite ? "Edit" : "Open"}</Link></td>
                     </tr>
                   ))}
                 </tbody>

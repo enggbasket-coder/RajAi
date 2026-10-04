@@ -22,6 +22,7 @@ export default async function ProjectDetail({ params }: { params: Promise<{ id: 
         subtitle={<>{project.client ? <Link href={`/clients/${project.client.id}`} className="hover:underline">{project.client.name}</Link> : "No client"} · <Badge value={project.status} /></>}
         actions={<>
           <Link href={`/tasks/new?projectId=${project.id}`} className="btn-primary btn-sm">＋ Assign task</Link>
+          {canWrite ? <a href="#edit-project" className="btn-secondary btn-sm">Edit project</a> : null}
           {canWrite ? <ActionButton action={`/api/projects/${project.id}/archive`} body={{ archived: !project.archived }} className="btn-secondary btn-sm" confirm={project.archived ? undefined : "Archive this project?"}>{project.archived ? "Unarchive" : "Archive"}</ActionButton> : null}
         </>}
       />
@@ -52,7 +53,7 @@ export default async function ProjectDetail({ params }: { params: Promise<{ id: 
           </Card>
         </div>
         {canWrite ? (
-          <Card title="Edit project">
+          <div id="edit-project" className="scroll-mt-6"><Card title="Edit project">
             <JsonForm action={`/api/projects/${project.id}`} method="PATCH" submitLabel="Save" className="space-y-3" successMessage="Saved">
               <Field label="Name"><input name="name" className="input" defaultValue={project.name} required /></Field>
               <Field label="Client"><select name="clientId" className="input" defaultValue={project.clientId ?? ""}><option value="">No client</option>{clients.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}</select></Field>
@@ -66,7 +67,7 @@ export default async function ProjectDetail({ params }: { params: Promise<{ id: 
               <Field label="Description"><textarea name="description" className="input" rows={2} defaultValue={project.description ?? ""} /></Field>
               <label className="flex items-center gap-2 text-sm"><input type="checkbox" name="billable" defaultChecked={project.billable} /> Billable</label>
             </JsonForm>
-          </Card>
+          </Card></div>
         ) : null}
       </div>
     </>
