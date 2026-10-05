@@ -76,7 +76,7 @@ export function Tabs({ tabs, active }: { tabs: { href: string; label: string; ke
 export function Avatar({ name, size = 40 }: { name: string; size?: number }) {
   const initials = name.split(/\s+/).map((p) => p[0]).filter(Boolean).slice(0, 2).join("").toUpperCase();
   return (
-    <span className="inline-flex shrink-0 items-center justify-center rounded-full bg-ink font-medium text-white dark:text-[#0a0e17]" style={{ width: size, height: size, fontSize: size * 0.36 }}>
+    <span className="inline-flex shrink-0 items-center justify-center rounded-full bg-ink font-medium text-white" style={{ width: size, height: size, fontSize: size * 0.36 }}>
       {initials}
     </span>
   );

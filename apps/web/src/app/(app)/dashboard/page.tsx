@@ -42,7 +42,7 @@ export default async function DashboardPage() {
             {steps.map((st, i) => (
               <li key={st.label} className={`inset flex flex-col gap-1 p-4 ${st.done ? "opacity-60" : ""}`}>
                 <div className="flex items-center gap-2">
-                  <span className={`inline-flex h-6 w-6 items-center justify-center rounded-full text-xs font-medium ${st.done ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300" : "bg-ink text-white dark:text-[#0a0e17]"}`}>{st.done ? "✓" : i + 1}</span>
+                  <span className={`inline-flex h-6 w-6 items-center justify-center rounded-full text-xs font-medium ${st.done ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300" : "bg-ink text-on-ink"}`}>{st.done ? "✓" : i + 1}</span>
                   <span className={`text-sm font-medium ${st.done ? "line-through" : ""}`}>{st.label}</span>
                 </div>
                 <p className="text-xs text-slate-500">{st.hint}</p>

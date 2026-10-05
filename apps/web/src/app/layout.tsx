@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import { themeInitScript } from "@/components/ThemeToggle";
+import { themeInitScript } from "@/lib/theme";
 
 export const metadata: Metadata = { title: "Trackwise", description: "Time tracking and task management with WhatsApp and Telegram" };
 

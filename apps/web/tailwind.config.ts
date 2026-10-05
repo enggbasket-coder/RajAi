@@ -25,10 +25,12 @@ export default {
         brand: { 50: v("--c-brand50"), 100: v("--c-brand100"), 500: v("--c-accent"), 600: v("--c-accent"), 700: v("--c-accent-deep") },
         accent: { DEFAULT: v("--c-accent"), deep: v("--c-accent-deep"), soft: v("--c-brand50") },
         ink: v("--c-ink"),
+        "on-ink": v("--c-on-ink"),
+        "on-accent": v("--c-on-accent"),
         canvas: v("--c-canvas"),
         surface: v("--c-surface"),
       },
-      borderRadius: { sharp: "14px", card: "24px", frame: "32px" },
+      borderRadius: { sharp: "var(--r-sharp)", card: "var(--r-card)", frame: "var(--r-frame)" },
       boxShadow: {
         card: "var(--shadow-card)",
         frame: "var(--shadow-frame)",

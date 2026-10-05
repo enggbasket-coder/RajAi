@@ -179,6 +179,10 @@ Features: sign in (Bearer session, stored in the OS user-data folder), organizat
 - **Secrets** (tokens, app secret, verify token, webhook secret) are encrypted with AES-256-GCM and only decrypted server-side when calling the provider.
 - **Monitoring** (activity %, screenshots, app/URL tracking) is Phase 2, `monitoringEnabled` defaults to `false` and there is no UI to turn it on. Trackwise never records keystrokes, clipboard, webcam or audio.
 
+## Appearance: colour themes and Liquid Glass
+
+The header has a theme picker with eight complete colour themes (four light: Coral, Sage, Ocean, Slate; four dark: Midnight, Moss, Abyss, Graphite) and a "Liquid Glass finish" toggle that layers frosted, floating panels over whichever theme is active. Themes are pure CSS token sets in `apps/web/src/app/globals.css` (`:root[data-theme=…]` plus `.dark`), the glass finish is scoped to `:root[data-glass]`, and the choice is stored in `localStorage` (`tw-theme`, `tw-glass`) and applied by an inline script in the root layout before first paint. Status colours (red/amber/green) are never themed. After a deploy, hard-refresh once if styles look stale.
+
 ## MVP scope and what is deliberately not built
 
 Built: Milestones 1–8 (foundation, work management, messaging framework, WhatsApp, Telegram, time tracking incl. Electron agent, timesheets, dashboard / live team / reports / CSV / audit).

@@ -59,7 +59,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
         <header className="flex flex-wrap items-center justify-between gap-4 px-6 pt-5 md:px-8">
           <div className="flex items-center gap-4">
             <Link href="/dashboard" className="flex items-center gap-3">
-              <span className="inline-flex h-11 w-11 items-center justify-center rounded-full bg-ink text-lg font-semibold text-white dark:text-[#0a0e17]">T</span>
+              <span className="inline-flex h-11 w-11 items-center justify-center rounded-full bg-ink text-lg font-semibold text-white">T</span>
               <span className="leading-tight">
                 <span className="block text-base font-medium text-slate-900">Trackwise</span>
                 <span className="block text-sm text-slate-500">{org.name}</span>
