@@ -20,9 +20,9 @@ export interface Theme {
 
 export const THEMES: Theme[] = [
   { id: "coral", label: "Coral", hint: "Warm grey canvas, coral accent", dark: false, family: "", dots: ["#ececec", "#ffffff", "#e65d3e"] },
-  { id: "sage", label: "Sage", hint: "Cream paper, army green", dark: false, family: "sage", dots: ["#efebe2", "#ffffff", "#395c14"] },
-  { id: "ocean", label: "Ocean", hint: "Blue-washed canvas, deep sea accent", dark: false, family: "ocean", dots: ["#e3eff7", "#ffffff", "#07618c"] },
-  { id: "slate", label: "Slate", hint: "Cool grey, near-black accent, tight corners", dark: false, family: "slate", dots: ["#eeeff1", "#ffffff", "#191f2a"] },
+  { id: "sage", label: "Sage", hint: "Cream paper, army green", dark: false, family: "sage", dots: ["#efece6", "#ffffff", "#3a5c14"] },
+  { id: "ocean", label: "Ocean", hint: "Blue-washed canvas, deep sea accent", dark: false, family: "ocean", dots: ["#e3eff7", "#ffffff", "#075e8d"] },
+  { id: "slate", label: "Slate", hint: "Cool grey, near-black accent, tight corners", dark: false, family: "slate", dots: ["#eeeff1", "#ffffff", "#191e29"] },
   { id: "midnight", label: "Midnight", hint: "Deep navy, coral accent", dark: true, family: "", dots: ["#080b12", "#111621", "#f0633f"] },
   { id: "moss", label: "Moss", hint: "Dark forest, lime accent", dark: true, family: "sage", dots: ["#0c100d", "#141a16", "#86b046"] },
   { id: "abyss", label: "Abyss", hint: "Deep sea blue", dark: true, family: "ocean", dots: ["#06121e", "#0a1e30", "#3898d2"] },
