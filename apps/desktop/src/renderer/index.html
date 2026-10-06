@@ -1,0 +1,77 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Trackwise</title>
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self'" />
+  <style>
+    body { font-family: -apple-system, Segoe UI, Roboto, sans-serif; margin: 0; background: #f8fafc; color: #0f172a; font-size: 14px; }
+    .wrap { padding: 16px; }
+    h1 { font-size: 16px; margin: 0 0 12px; color: #1d4ed8; }
+    input, select, button { font: inherit; }
+    input, select { width: 100%; box-sizing: border-box; padding: 8px; border: 1px solid #cbd5e1; border-radius: 6px; margin-bottom: 8px; }
+    button { padding: 8px 12px; border-radius: 6px; border: 1px solid #cbd5e1; background: #fff; cursor: pointer; }
+    button.primary { background: #1d4ed8; color: #fff; border-color: #1d4ed8; }
+    button.danger { background: #e11d48; color: #fff; border-color: #e11d48; }
+    .clock { font-family: ui-monospace, Menlo, monospace; font-size: 40px; text-align: center; margin: 12px 0 4px; }
+    .muted { color: #64748b; font-size: 12px; }
+    .indicator { display: inline-flex; align-items: center; gap: 6px; padding: 2px 8px; border-radius: 999px; background: #d1fae5; color: #065f46; font-size: 12px; }
+    .dot { width: 8px; height: 8px; border-radius: 50%; background: #10b981; animation: pulse 1.2s infinite; }
+    @keyframes pulse { 50% { opacity: .3; } }
+    .task { display: flex; justify-content: space-between; align-items: center; padding: 8px; border: 1px solid #e2e8f0; border-radius: 6px; background: #fff; margin-bottom: 6px; }
+    .task .t { font-weight: 500; }
+    .err { background: #ffe4e6; color: #9f1239; padding: 8px; border-radius: 6px; margin: 8px 0; }
+    .hidden { display: none; }
+    .modal { position: fixed; inset: 0; background: rgba(15,23,42,.5); display: flex; align-items: center; justify-content: center; }
+    .modal .box { background: #fff; padding: 16px; border-radius: 8px; width: 320px; }
+    .row { display: flex; gap: 8px; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>Trackwise</h1>
+    <div id="error" class="err hidden"></div>
+
+    <section id="login">
+      <label class="muted">Server URL</label>
+      <input id="apiUrl" placeholder="https://trackwise.example.com" />
+      <input id="email" type="email" placeholder="Email" />
+      <input id="password" type="password" placeholder="Password" />
+      <button id="loginBtn" class="primary">Sign in</button>
+    </section>
+
+    <section id="app" class="hidden">
+      <div class="row" style="justify-content: space-between; align-items: center;">
+        <span id="who" class="muted"></span>
+        <span class="row"><select id="orgSelect" style="width:auto; margin:0"></select><button id="logoutBtn">Sign out</button></span>
+      </div>
+      <div class="clock" id="clock">00:00:00</div>
+      <div style="text-align:center">
+        <div id="currentTask" class="muted">No timer running</div>
+        <div id="indicator" class="indicator hidden"><span class="dot"></span> Tracking</div>
+      </div>
+      <div class="row" style="justify-content:center; margin: 12px 0;">
+        <button id="stopBtn" class="danger hidden">■ Stop</button>
+        <button id="refreshBtn">↻ Sync</button>
+      </div>
+      <h3 style="font-size:13px; margin: 12px 0 6px;">Accepted tasks</h3>
+      <div id="tasks"></div>
+      <h3 style="font-size:13px; margin: 12px 0 6px;">Pending assignments</h3>
+      <div id="pending"></div>
+      <p class="muted" id="idleInfo"></p>
+    </section>
+  </div>
+
+  <div id="idleModal" class="modal hidden">
+    <div class="box">
+      <h3 style="margin-top:0">You've been idle for <span id="idleMin">10</span> minutes.</h3>
+      <p class="muted">Keep the idle time on your timer or discard it? Nothing is removed automatically.</p>
+      <div class="row">
+        <button id="keepIdle" class="primary">Keep idle time</button>
+        <button id="discardIdle">Discard idle time</button>
+      </div>
+    </div>
+  </div>
+  <script src="renderer.js"></script>
+</body>
+</html>
