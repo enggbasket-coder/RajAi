@@ -314,3 +314,6 @@ pre code { background: transparent; padding: 0; }
 }
 /* the theme menu stays opaque so its previews and labels never sit on refracted content */
 [data-glass] .theme-menu { background: rgb(var(--c-surface)); -webkit-backdrop-filter: none; backdrop-filter: none; }
+
+/* PlusBrains wordmark serif */
+.pb-serif { font-family: "Instrument Serif", Georgia, serif; }
