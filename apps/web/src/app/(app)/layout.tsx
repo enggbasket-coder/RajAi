@@ -8,6 +8,7 @@ import { Nav, type NavItem } from "@/components/Nav";
 import { OrgSwitcher } from "@/components/OrgSwitcher";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { Avatar } from "@/components/ui";
+import { PoweredBy } from "@/components/PoweredBy";
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const actor = await requireActor();
@@ -89,6 +90,10 @@ export default async function AppLayout({ children }: { children: React.ReactNod
           <Nav sections={[{ title: "Work", items: work }, { title: managerial ? "Manage" : "Insights", items: manage }, { title: "Settings", items: settings }]} />
         </div>
         <main className="rounded-t-frame bg-slate-50 px-6 py-6 md:px-8 md:py-8">{children}</main>
+        <footer className="flex flex-wrap items-center justify-between gap-2 bg-slate-50 px-6 pb-5 md:px-8">
+          <span className="text-xs text-slate-400">Trackwise · {org.name}</span>
+          <PoweredBy />
+        </footer>
       </div>
     </div>
   );

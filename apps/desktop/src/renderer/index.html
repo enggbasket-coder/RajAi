@@ -25,6 +25,10 @@
     .modal { position: fixed; inset: 0; background: rgba(15,23,42,.5); display: flex; align-items: center; justify-content: center; }
     .modal .box { background: #fff; padding: 16px; border-radius: 8px; width: 320px; }
     .row { display: flex; gap: 8px; }
+    .powered { margin-top: 24px; text-align: center; font-size: 12px; color: #64748b; }
+    .powered a { color: inherit; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; }
+    .powered b { color: #0f172a; font-weight: 500; }
+    .powered svg { width: 16px; height: 16px; border-radius: 4px; }
   </style>
 </head>
 <body>
@@ -60,6 +64,7 @@
       <div id="pending"></div>
       <p class="muted" id="idleInfo"></p>
     </section>
+    <p class="powered"><a href="https://plusbrains.ai" target="_blank" rel="noopener noreferrer">Powered by <svg viewBox="0 0 32 32" aria-hidden="true"><rect x="1" y="1" width="30" height="30" rx="8" fill="#1D3A6E"/><path d="M16 8v16M8 16h16" stroke="#fff" stroke-width="3.2" stroke-linecap="round"/><circle cx="23.5" cy="8.5" r="2.5" fill="#E8A317"/></svg><b>PlusBrains</b></a></p>
   </div>
 
   <div id="idleModal" class="modal hidden">

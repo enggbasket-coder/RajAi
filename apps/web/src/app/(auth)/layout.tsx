@@ -1,4 +1,5 @@
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { PoweredBy } from "@/components/PoweredBy";
 
 export default function AuthLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -11,6 +12,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
           <div className="mt-1 text-sm text-slate-500">Assign · Notify · Accept · Track · Approve</div>
         </div>
         <div className="card card-body">{children}</div>
+        <div className="mt-6 text-center"><PoweredBy /></div>
       </div>
     </main>
   );
