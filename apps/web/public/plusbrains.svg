@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img" aria-label="PlusBrains">
+  <path d="M4 19A15 15 0 0 1 19 4H23A6 6 0 0 1 29 10V26.5A2.5 2.5 0 0 1 26.5 29H10A6 6 0 0 1 4 23Z" fill="#FF6A2B"/>
+  <path d="M4 19A15 15 0 0 1 19 4H23A6 6 0 0 1 29 10V26.5A2.5 2.5 0 0 1 26.5 29H10A6 6 0 0 1 4 23Z" fill="#141414" transform="rotate(90 32 32)"/>
+  <path d="M4 19A15 15 0 0 1 19 4H23A6 6 0 0 1 29 10V26.5A2.5 2.5 0 0 1 26.5 29H10A6 6 0 0 1 4 23Z" fill="#141414" transform="rotate(180 32 32)"/>
+  <path d="M4 19A15 15 0 0 1 19 4H23A6 6 0 0 1 29 10V26.5A2.5 2.5 0 0 1 26.5 29H10A6 6 0 0 1 4 23Z" fill="#141414" transform="rotate(270 32 32)"/>
+</svg>

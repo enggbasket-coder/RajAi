@@ -1,1 +1,16 @@
-server.log
+node_modules/
+.next/
+dist/
+out/
+build/
+coverage/
+*.log
+.env
+.env.local
+.env.*.local
+.turbo/
+packages/database/generated/
+apps/desktop/release/
+.DS_Store
+.env.production
+*.tsbuildinfo

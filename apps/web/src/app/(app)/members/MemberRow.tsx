@@ -1,0 +1,31 @@
+"use client";
+import { useRouter } from "next/navigation";
+import { Badge } from "@/components/ui";
+
+type R = { ready: boolean; label: string };
+export function MemberRow({ member, canManage, canRename, roles }: { canRename: boolean; member: { userId: string; name: string; email: string; role: string; active: boolean; preferredAssignmentChannel: string; channels: { whatsapp: R; telegram: R }; lastSeenAt: string | null }; canManage: boolean; roles: string[] }) {
+  const router = useRouter();
+  async function patch(body: Record<string, unknown>) {
+    const res = await fetch(`/api/users/${member.userId}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+    if (!res.ok) alert((await res.json()).error);
+    router.refresh();
+  }
+  const r = (x: R) => (x.ready ? <span className="text-emerald-700">✓ Ready</span> : <span className="text-slate-400">{x.label}</span>);
+  return (
+    <tr className={member.active ? "" : "opacity-60"}>
+      <td>
+        <div className="flex items-center gap-2">
+          <span className="font-medium">{member.name}</span>
+          {canRename ? <button className="text-xs text-slate-400 hover:text-brand-600" title="Edit display name" onClick={() => { const v = window.prompt("Display name (blank = full name):", member.name); if (v !== null) void patch({ displayName: v.trim() || null }); }}>✎ Edit</button> : null}
+        </div>
+        <div className="text-xs text-slate-500">{member.email}</div>
+      </td>
+      <td>{canManage ? <select className="input w-auto py-1" value={member.role} onChange={(e) => patch({ role: e.target.value })}>{[...new Set([member.role, ...roles])].map((x) => <option key={x}>{x}</option>)}</select> : <Badge value={member.role} />}</td>
+      <td>{r(member.channels.whatsapp)}</td>
+      <td>{r(member.channels.telegram)}</td>
+      <td>{canManage ? <select className="input w-auto py-1" value={member.preferredAssignmentChannel} onChange={(e) => patch({ preferredAssignmentChannel: e.target.value })}>{["DEFAULT", "WHATSAPP", "TELEGRAM", "BOTH"].map((x) => <option key={x}>{x}</option>)}</select> : member.preferredAssignmentChannel}</td>
+      <td>{member.active ? <span className="badge bg-emerald-100 text-emerald-800">Active</span> : <span className="badge bg-slate-200 text-slate-600">Inactive</span>}</td>
+      {canRename ? <td className="text-right">{canManage ? <button className="btn-secondary btn-sm" onClick={() => patch({ active: !member.active })}>{member.active ? "Deactivate" : "Reactivate"}</button> : <span className="text-xs text-slate-400">{member.role === "OWNER" ? "Owner" : "You"}</span>}</td> : null}
+    </tr>
+  );
+}
