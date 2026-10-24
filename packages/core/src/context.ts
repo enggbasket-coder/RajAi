@@ -13,3 +13,10 @@ export function can(actor: Actor, permission: Permission): boolean {
 }
 
 export const APP_URL = () => (process.env.APP_URL || "http://localhost:3000").replace(/\/$/, "");
+
+/** Platform (PlusBrains) operators: emails listed in PLATFORM_ADMIN_EMAILS. They see cross-organization usage. */
+export function isPlatformAdmin(email: string | null | undefined): boolean {
+  if (!email) return false;
+  const list = (process.env.PLATFORM_ADMIN_EMAILS || "").split(",").map((s) => s.trim().toLowerCase()).filter(Boolean);
+  return list.includes(email.toLowerCase());
+}

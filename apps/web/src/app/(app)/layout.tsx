@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { listMemberships } from "@trackwise/auth";
 import { isAdminLike, isManagerial } from "@trackwise/rbac";
+import { isPlatformAdmin } from "@trackwise/core";
 import { prisma } from "@trackwise/database";
 import { requireActor } from "@/lib/session";
 import { Heartbeat } from "@/components/Heartbeat";
@@ -49,6 +50,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
         ]
       : []),
   ];
+  const platform: NavItem[] = isPlatformAdmin(actor.user.email) ? [{ href: "/platform/usage", label: "WhatsApp usage" }] : [];
   const now = new Date();
   const day = new Intl.DateTimeFormat("en-GB", { timeZone: org.timezone, day: "numeric" }).format(now);
   const dateLabel = `${new Intl.DateTimeFormat("en-GB", { timeZone: org.timezone, weekday: "short" }).format(now)}, ${new Intl.DateTimeFormat("en-GB", { timeZone: org.timezone, month: "long" }).format(now)}`;
@@ -87,7 +89,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
           </div>
         </header>
         <div className="px-6 pb-4 pt-4 md:px-8">
-          <Nav sections={[{ title: "Work", items: work }, { title: managerial ? "Manage" : "Insights", items: manage }, { title: "Settings", items: settings }]} />
+          <Nav sections={[{ title: "Work", items: work }, { title: managerial ? "Manage" : "Insights", items: manage }, { title: "Settings", items: settings }, ...(platform.length ? [{ title: "Platform", items: platform }] : [])]} />
         </div>
         <main className="rounded-t-frame bg-slate-50 px-6 py-6 md:px-8 md:py-8">{children}</main>
         <footer className="flex items-center justify-center bg-slate-50 px-6 pb-5 md:px-8">

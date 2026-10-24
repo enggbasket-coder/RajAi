@@ -147,6 +147,15 @@ Features: sign in (Bearer session, stored in the OS user-data folder), organizat
 5. **Opt-in**: Trackwise only messages numbers that belong to an active member, are verified and have `opted_in = true` (employee: *My messaging → Save & opt in*). Unknown numbers that message the bot are logged and never answered or auto-created.
 6. Delivery states `sent → delivered → read / failed` arrive as status webhooks and are applied monotonically to `assignment_deliveries` and `communication_messages`.
 
+### Shared platform number (one number for all organizations)
+
+For a SaaS roll-out you do not need a WhatsApp number per client. Set the platform number once in the server environment (`META_PHONE_NUMBER_ID`, `META_ACCESS_TOKEN`, `META_APP_SECRET`, `META_VERIFY_TOKEN`, optional `META_DISPLAY_PHONE_NUMBER`, `META_DISPLAY_NAME`, default "Trackwise by PlusBrains"). Every organization that has not configured its own WhatsApp connection sends and receives through it:
+
+- **Outbound** uses the organization's own connection when one is enabled, otherwise the shared number. An explicitly disabled connection stays off.
+- **Inbound** on the shared number is routed by the sender's verified, opted-in phone: the one organization they belong to; else a signed assignment reference; else a pending organization choice; else the organization they talked to in the last 24 hours; else the bot asks "Which organization do you mean? 1. … 2. …" and remembers the answer. Unknown numbers are logged and never answered or auto-created.
+- **Onboarding a client** is then: create the organization, invite the admin, employees save their number under *My messaging* and send "hi" once. No Meta steps for the client.
+- **Usage and re-billing**: `/platform/usage` (visible to emails in `PLATFORM_ADMIN_EMAILS`) shows per-organization messages, recipients and conversations per month with an estimated cost (`WHATSAPP_CONVERSATION_RATE`), plus CSV export. Meta's invoice remains the source of truth.
+
 ## Telegram bot setup
 
 1. Create a bot with [@BotFather](https://t.me/BotFather) and copy the token.

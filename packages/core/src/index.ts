@@ -15,4 +15,5 @@ export * from "./messaging/connections";
 export * from "./messaging/identities";
 export * from "./messaging/service";
 export * from "./messaging/inbound";
+export * from "./messaging/usage";
 export { TimerService } from "@trackwise/timer";

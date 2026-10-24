@@ -138,6 +138,7 @@ enum ConversationState {
   AWAITING_ASSIGNEE_CHOICE
   AWAITING_PROJECT_CHOICE
   AWAITING_DUE_CLARIFICATION
+  AWAITING_ORG_CHOICE
 }
 
 // ───────────────────────── Identity & tenancy ─────────────────────────

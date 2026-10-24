@@ -85,7 +85,8 @@ export async function processInboundEvent(provider: Channel, payload: unknown, c
       const hint = webhook.events.find((e) => e.connectionHint)?.connectionHint ?? null;
       resolved = await findWhatsAppConnectionByPhoneNumberId(hint);
     }
-    const organizationId = resolved?.row.organizationId ?? null;
+    const shared = resolved?.shared === true;
+    const organizationId = shared ? null : (resolved?.row?.organizationId ?? null);
 
     // Idempotency: store the event first; a duplicate external id means we already handled it.
     const payloadHash = sha256Hex(JSON.stringify(payload));
@@ -111,11 +112,15 @@ export async function processInboundEvent(provider: Channel, payload: unknown, c
 
     const outcomes: string[] = [];
     try {
-      if (!resolved || !resolved.conn || !resolved.row.enabled || resolved.row.provider !== provider) {
+      if (!resolved || !resolved.conn || (!shared && (!resolved.row || !resolved.row.enabled || resolved.row.provider !== provider))) {
         outcomes.push("UNKNOWN_CONNECTION");
+      } else if (shared) {
+        for (const ev of webhook.events) {
+          outcomes.push(await handleSharedEvent(ev, resolved.conn, adapter));
+        }
       } else {
         for (const ev of webhook.events) {
-          outcomes.push(await handleEvent(ev, resolved.row.organizationId, resolved.conn, adapter));
+          outcomes.push(await handleEvent(ev, resolved.row!.organizationId, resolved.conn, adapter));
         }
       }
       await prisma.messagingWebhookEvent.update({ where: { id: eventRow.id }, data: { processed: true, processedAt: new Date(), error: null } });
@@ -127,6 +132,67 @@ export async function processInboundEvent(provider: Channel, payload: unknown, c
     summary.outcomes.push(...outcomes);
   }
   return summary;
+}
+
+/** Shared platform number: the organization is not known from the phone number, so it is resolved from the sender.
+ *  Order: delivery statuses (organization-agnostic) → the one organization the sender belongs to → a signed assignment
+ *  reference → a pending organization choice → the organization the sender talked to in the last 24 hours → ask. */
+async function handleSharedEvent(ev: NormalizedMessagingEvent, conn: ProviderConnection, adapter: MessagingProviderAdapter): Promise<string> {
+  if (ev.type === "MESSAGE_STATUS") {
+    const r = await MessagingService.applyMessageStatus(ev.provider, ev.externalMessageId, ev.status, { code: ev.errorCode, message: ev.errorMessage }, ev.timestamp);
+    return r.matchedDelivery || r.matchedMessage ? `STATUS_${ev.status}` : "STATUS_UNMATCHED";
+  }
+  const identities = await prisma.userMessagingIdentity.findMany({
+    where: { provider: ev.provider, providerUserId: ev.providerUserId, disabled: false, verified: true },
+    include: { conversation: true, organization: { select: { id: true, name: true } } },
+    orderBy: { createdAt: "asc" },
+  });
+  const candidates: typeof identities = [];
+  for (const i of identities) {
+    const member = await prisma.organizationMember.findFirst({ where: { organizationId: i.organizationId, userId: i.userId, active: true } });
+    if (member) candidates.push(i);
+  }
+  // Unknown numbers are logged (webhook event) and never answered or auto-created.
+  if (candidates.length === 0) return "UNKNOWN_SENDER";
+  const forOrg = (organizationId: string) => handleEvent(ev, organizationId, { ...conn, organizationId }, adapter);
+  if (candidates.length === 1) return forOrg(candidates[0].organizationId);
+
+  const data = ev.type === "BUTTON_CLICKED" ? ev.callbackData : ev.text.trim();
+  const ref = verifyRef(data);
+  if (ref && (ref.prefix === "acc" || ref.prefix === "rej")) {
+    const a = await prisma.taskAssignment.findUnique({ where: { id: ref.id }, select: { organizationId: true } });
+    if (a && candidates.some((c) => c.organizationId === a.organizationId)) return forOrg(a.organizationId);
+  }
+
+  const pending = candidates.find((c) => c.conversation?.state === "AWAITING_ORG_CHOICE");
+  if (pending && ev.type === "MESSAGE_RECEIVED") {
+    const options = ((pending.conversation!.contextJson as { orgOptions?: { id: string; name: string }[] }).orgOptions ?? []).filter((o) => candidates.some((c) => c.organizationId === o.id));
+    const n = parseChoice(data, options.length);
+    if (n) {
+      const chosen = candidates.find((c) => c.organizationId === options[n - 1].id)!;
+      for (const c of candidates) {
+        if (c.conversation) await prisma.messagingConversation.update({ where: { id: c.conversation.id }, data: { state: "IDLE", contextJson: c.id === chosen.id ? { lastOrgChoiceAt: new Date().toISOString() } : {} } });
+      }
+      await MessagingService.sendRaw({ organizationId: chosen.organizationId, userId: chosen.userId, channel: "WHATSAPP", conn: { ...conn, organizationId: chosen.organizationId }, recipient: { providerUserId: ev.providerUserId }, text: `Now working with ${options[n - 1].name} ✅\nPlease send your message again.`, messageType: "SYSTEM" });
+      return "ORG_SELECTED";
+    }
+  }
+
+  const dayAgo = Date.now() - 24 * 60 * 60 * 1000;
+  const recent = candidates
+    .filter((c) => c.conversation && c.conversation.updatedAt.getTime() > dayAgo)
+    .sort((a, b) => b.conversation!.updatedAt.getTime() - a.conversation!.updatedAt.getTime())[0];
+  if (recent) return forOrg(recent.organizationId);
+
+  const orgOptions = candidates.map((c) => ({ id: c.organizationId, name: c.organization.name }));
+  for (const c of candidates) {
+    if (c.conversation) await prisma.messagingConversation.update({ where: { id: c.conversation.id }, data: { state: "AWAITING_ORG_CHOICE", contextJson: { orgOptions } } });
+    else await prisma.messagingConversation.create({ data: { organizationId: c.organizationId, identityId: c.id, state: "AWAITING_ORG_CHOICE", contextJson: { orgOptions } } });
+  }
+  const first = candidates[0];
+  const list = orgOptions.map((o, i) => `${i + 1}. ${o.name}`).join("\n");
+  await MessagingService.sendRaw({ organizationId: first.organizationId, userId: first.userId, channel: "WHATSAPP", conn: { ...conn, organizationId: first.organizationId }, recipient: { providerUserId: ev.providerUserId }, text: `Your number is linked to more than one organization on Trackwise. Which one do you mean?\n${list}\nReply with the number.`, messageType: "SYSTEM" });
+  return "ORG_CHOICE_REQUESTED";
 }
 
 async function handleEvent(ev: NormalizedMessagingEvent, organizationId: string, conn: ProviderConnection, adapter: MessagingProviderAdapter): Promise<string> {
@@ -311,6 +377,9 @@ async function handleText(ctx: Ctx, rawText: string): Promise<string> {
   }
 
   switch (ctx.conversation.state) {
+    case "AWAITING_ORG_CHOICE":
+      await setState(ctx, "IDLE");
+      break;
     case "AWAITING_REJECTION_REASON":
       return finishRejection(ctx, text);
     case "AWAITING_ASSIGN_CONFIRMATION": {

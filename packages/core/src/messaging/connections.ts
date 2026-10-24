@@ -2,7 +2,7 @@ import { prisma } from "@trackwise/database";
 import { encryptSecret, randomToken, validation } from "@trackwise/shared";
 import { AuditService } from "../audit";
 import { APP_URL, requirePermission, type Actor } from "../context";
-import { getProvider, providerMode, toProviderConnection } from "./providers";
+import { getProvider, providerMode, sharedWhatsAppInfo, toProviderConnection } from "./providers";
 
 /** Safe, client-facing view of a connection — never includes secrets. */
 export function publicConnection(row: Awaited<ReturnType<typeof prisma.messagingConnection.findFirst>>) {
@@ -36,6 +36,7 @@ export const ConnectionService = {
     return {
       whatsapp: publicConnection(rows.find((r) => r.provider === "WHATSAPP") ?? null),
       telegram: publicConnection(rows.find((r) => r.provider === "TELEGRAM") ?? null),
+      sharedWhatsApp: sharedWhatsAppInfo(),
       webhookUrls: {
         whatsapp: `${APP_URL()}/api/webhooks/whatsapp`,
         telegram: rows.find((r) => r.provider === "TELEGRAM") ? `${APP_URL()}/api/webhooks/telegram/${rows.find((r) => r.provider === "TELEGRAM")!.id}` : null,

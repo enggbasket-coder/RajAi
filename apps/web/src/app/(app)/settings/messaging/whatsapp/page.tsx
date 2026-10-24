@@ -8,10 +8,15 @@ export const dynamic = "force-dynamic";
 export default async function WhatsAppSettings() {
   const actor = await requireActor();
   guard(actor, "messaging:configure");
-  const { whatsapp: w, webhookUrls } = await ConnectionService.list(actor);
+  const { whatsapp: w, webhookUrls, sharedWhatsApp } = await ConnectionService.list(actor);
   return (
     <>
       <PageHeader title="WhatsApp settings" subtitle="Official Meta WhatsApp Business Cloud API. Secrets are encrypted at rest and never sent back to the browser." />
+      {!w && sharedWhatsApp.configured ? (
+        <p className="mb-6 rounded-sharp bg-amber-50 p-3 text-xs text-amber-800 dark:bg-amber-500/10 dark:text-amber-300">
+          You are currently on the shared <strong>{sharedWhatsApp.displayName}</strong> number, which needs no setup. Saving a connection below switches this organization to its own number; your employees would then message that number instead.
+        </p>
+      ) : null}
       <div className="grid gap-6 lg:grid-cols-2">
         <Card title="Connection">
           <JsonForm action="/api/messaging/connections/whatsapp" submitLabel="Save connection" className="space-y-3" successMessage="Saved">

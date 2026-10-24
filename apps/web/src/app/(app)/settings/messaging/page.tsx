@@ -10,15 +10,21 @@ export default async function MessagingSettings() {
   const actor = await requireActor();
   guard(actor, "messaging:configure");
   const [c, org] = await Promise.all([ConnectionService.list(actor), OrganizationService.get(actor)]);
-  const status = (x: { enabled: boolean; status: string } | null) => (x?.enabled ? <span className="badge bg-emerald-100 text-emerald-800">Connected</span> : <span className="badge bg-slate-200 text-slate-600">Not connected</span>);
+  const usingShared = !c.whatsapp && c.sharedWhatsApp.configured;
+  const status = (x: { enabled: boolean; status: string } | null, shared = false) => (x?.enabled ? <span className="badge bg-emerald-100 text-emerald-800">Connected</span> : shared ? <span className="badge bg-emerald-100 text-emerald-800">Shared number</span> : <span className="badge bg-slate-200 text-slate-600">Not connected</span>);
   return (
     <>
       <PageHeader title="Messaging channels" subtitle="Trackwise stays the source of truth; WhatsApp and Telegram are interfaces into it." />
       <div className="grid gap-6 lg:grid-cols-2">
-        <Card title={<>WhatsApp {status(c.whatsapp)} <span className="ml-2 text-xs font-normal text-slate-400">provider: {c.whatsapp?.mode ?? process.env.WHATSAPP_PROVIDER ?? "mock"}</span></>} actions={<Link href="/settings/messaging/whatsapp" className="text-xs text-brand-600 hover:underline">Configure</Link>}>
+        <Card title={<>WhatsApp {status(c.whatsapp, usingShared)} <span className="ml-2 text-xs font-normal text-slate-400">provider: {c.whatsapp?.mode ?? process.env.WHATSAPP_PROVIDER ?? "mock"}</span></>} actions={<Link href="/settings/messaging/whatsapp" className="text-xs text-brand-600 hover:underline">Configure</Link>}>
+          {usingShared ? (
+            <p className="mb-3 rounded-sharp bg-emerald-50 p-3 text-xs text-emerald-800 dark:bg-emerald-500/10 dark:text-emerald-300">
+              This organization uses the shared <strong>{c.sharedWhatsApp.displayName}</strong> number{c.sharedWhatsApp.displayPhoneNumber ? ` (${c.sharedWhatsApp.displayPhoneNumber})` : ""}. Nothing to set up: employees save their WhatsApp number under My messaging and send “hi” once. Configure a connection here only if you want your own branded number.
+            </p>
+          ) : null}
           <dl className="space-y-1 text-sm text-slate-600">
-            <div className="flex justify-between"><dt>Phone number</dt><dd>{c.whatsapp?.displayPhoneNumber ?? "—"}</dd></div>
-            <div className="flex justify-between"><dt>Phone number ID</dt><dd className="font-mono text-xs">{c.whatsapp?.phoneNumberId ?? "—"}</dd></div>
+            <div className="flex justify-between"><dt>Phone number</dt><dd>{c.whatsapp?.displayPhoneNumber ?? (usingShared ? c.sharedWhatsApp.displayPhoneNumber ?? "shared" : "—")}</dd></div>
+            <div className="flex justify-between"><dt>Phone number ID</dt><dd className="font-mono text-xs">{c.whatsapp?.phoneNumberId ?? (usingShared ? "shared" : "—")}</dd></div>
             <div className="flex justify-between"><dt>Webhook</dt><dd className="font-mono text-xs">{c.webhookUrls.whatsapp}</dd></div>
             <div className="flex justify-between"><dt>Template</dt><dd>{c.whatsapp?.assignmentTemplateName ?? "session messages only"}</dd></div>
             {c.whatsapp?.lastError ? <div className="text-rose-700">{c.whatsapp.lastError}</div> : null}

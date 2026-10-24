@@ -6,7 +6,7 @@ export const dynamic = "force-dynamic";
 export async function POST(req: NextRequest, ctx: { params: Promise<{ connectionId: string }> }) {
   const { connectionId } = await ctx.params;
   const connection = await findConnectionById(connectionId);
-  if (!connection || connection.row.provider !== "TELEGRAM" || !connection.row.enabled) return new NextResponse("Not found", { status: 404 });
+  if (!connection || !connection.row || connection.row.provider !== "TELEGRAM" || !connection.row.enabled) return new NextResponse("Not found", { status: 404 });
   const provider = getProvider("TELEGRAM");
   const rawBody = await req.text();
   if (!provider.isMock) {

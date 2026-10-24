@@ -261,7 +261,7 @@ export const MessagingService = {
     taskId?: string | null;
     taskAssignmentId?: string | null;
     messageType?: "TEXT" | "BUTTON" | "SYSTEM";
-    conversationState?: "IDLE" | "AWAITING_REJECTION_REASON" | "AWAITING_ASSIGN_CONFIRMATION" | "AWAITING_ASSIGNEE_CHOICE" | "AWAITING_PROJECT_CHOICE" | "AWAITING_DUE_CLARIFICATION";
+    conversationState?: "IDLE" | "AWAITING_REJECTION_REASON" | "AWAITING_ASSIGN_CONFIRMATION" | "AWAITING_ASSIGNEE_CHOICE" | "AWAITING_PROJECT_CHOICE" | "AWAITING_DUE_CLARIFICATION" | "AWAITING_ORG_CHOICE";
   }): Promise<ProviderMessageResult> {
     const readiness = await channelReadiness(input.organizationId, input.userId, input.channel);
     if (!readiness.ready) {
@@ -283,7 +283,7 @@ export const MessagingService = {
     taskId?: string | null;
     taskAssignmentId?: string | null;
     messageType?: "TEXT" | "BUTTON" | "SYSTEM";
-    conversationState?: "IDLE" | "AWAITING_REJECTION_REASON" | "AWAITING_ASSIGN_CONFIRMATION" | "AWAITING_ASSIGNEE_CHOICE" | "AWAITING_PROJECT_CHOICE" | "AWAITING_DUE_CLARIFICATION";
+    conversationState?: "IDLE" | "AWAITING_REJECTION_REASON" | "AWAITING_ASSIGN_CONFIRMATION" | "AWAITING_ASSIGNEE_CHOICE" | "AWAITING_PROJECT_CHOICE" | "AWAITING_DUE_CLARIFICATION" | "AWAITING_ORG_CHOICE";
   }): Promise<ProviderMessageResult> {
     const provider = getProvider(input.channel);
     const msg: OutboundMessage = { text: input.text, buttons: input.buttons, editMessageId: input.editMessageId };
